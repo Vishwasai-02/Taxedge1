@@ -40,5 +40,10 @@ export const useAuthStore = create((set) => ({
         customer: newCustomer,
       };
     }),
+  // Local profile photo. Stored as the picker's file URI on this device.
+  setAvatar: (avatarUri) =>
+    set((state) =>
+      state.customer ? { customer: { ...state.customer, avatarUri } } : {},
+    ),
   logout: () => set({ isLoggedIn: false, customer: null, mobileNumber: null }),
 }));

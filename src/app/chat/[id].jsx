@@ -8,16 +8,17 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../hooks/use-theme";
 import { useApplicationStore } from "../../store/applicationStore";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ChatScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
 
   const applications = useApplicationStore((state) => state.applications);
@@ -68,7 +69,7 @@ export default function ChatScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
     >
       {/* Header bar */}
-      <SafeAreaView style={{ backgroundColor: colors.primaryDark }}>
+      <View style={{ backgroundColor: colors.primaryDark, paddingTop: insets.top }}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -84,7 +85,7 @@ export default function ChatScreen() {
           </View>
           <View style={styles.statusDot} />
         </View>
-      </SafeAreaView>
+      </View>
 
       {/* Messages Scroll Area */}
       <ScrollView
@@ -156,12 +157,13 @@ export default function ChatScreen() {
       </ScrollView>
 
       {/* Message Input Controls */}
-      <SafeAreaView
+      <View
         style={[
           styles.inputWrapper,
           {
             backgroundColor: colors.backgroundElement,
             borderTopColor: colors.border,
+            paddingBottom: Math.max(insets.bottom, 12),
           },
         ]}
       >
@@ -188,15 +190,18 @@ export default function ChatScreen() {
             styles.sendBtn,
             {
               backgroundColor: inputMessage.trim()
-                ? colors.orange
-                : colors.border,
+                ? colors.primary
+                : colors.backgroundSelected,
             },
           ]}
-          disabled={!inputMessage.trim()}
         >
-          <Ionicons name="send" size={18} color="#FFFFFF" />
+          <Ionicons
+            name="send"
+            size={18}
+            color={inputMessage.trim() ? "#FFFFFF" : colors.textSecondary}
+          />
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     </KeyboardAvoidingView>
   );
 }

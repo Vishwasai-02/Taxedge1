@@ -11,10 +11,12 @@ import { useTheme } from "../../hooks/use-theme";
 import { useApplicationStore } from "../../store/applicationStore";
 import { AppHeader } from "../../components/AppHeader";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ApplicationsScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const applications = useApplicationStore((state) => state.applications);
   const [activeTab, setActiveTab] = useState("ALL");
 
@@ -72,7 +74,7 @@ export default function ApplicationsScreen() {
       <FlatList
         data={filteredApps}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

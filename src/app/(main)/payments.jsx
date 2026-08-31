@@ -8,10 +8,12 @@ import { AppHeader } from '../../components/AppHeader';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { SecondaryButton } from '../../components/SecondaryButton';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PaymentsScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   
   const applications = useApplicationStore((state) => state.applications);
   const payApplication = useApplicationStore((state) => state.payApplication);
@@ -25,7 +27,7 @@ export default function PaymentsScreen() {
   // UI States
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'NETBANKING'>('UPI');
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePayNowPress = () => {
@@ -62,7 +64,7 @@ export default function PaymentsScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader title="Payments" showBack={false} />
       
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]} showsVerticalScrollIndicator={false}>
         
         {/* Main Unified Invoice Statement Card (Mockup Card 8) */}
         <View style={[styles.invoiceStatementCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>

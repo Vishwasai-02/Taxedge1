@@ -14,10 +14,12 @@ import { useAuthStore } from "../../store/authStore";
 import { FormInput } from "../../components/FormInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const setMobileNumber = useAuthStore((state) => state.setMobileNumber);
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState("");
@@ -44,7 +46,7 @@ export default function LoginScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={[styles.scrollContainer, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.headerSection}>

@@ -16,6 +16,7 @@ import { useAuthStore } from "../../store/authStore";
 import { FormInput } from "../../components/FormInput";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CUSTOMER_TYPES = [
   "Individual",
@@ -31,6 +32,7 @@ const CUSTOMER_TYPES = [
 export default function RegisterScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const register = useAuthStore((state) => state.register);
 
   // Form states
@@ -109,7 +111,7 @@ export default function RegisterScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={[styles.scrollContainer, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.headerSection}>

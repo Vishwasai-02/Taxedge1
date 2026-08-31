@@ -14,10 +14,12 @@ import { AppHeader } from "../../components/AppHeader";
 import { StatusTimeline } from "../../components/StatusTimeline";
 import { DocumentChecklist } from "../../components/DocumentChecklist";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ApplicationDetailScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const applications = useApplicationStore((state) => state.applications);
   const uploadDocument = useApplicationStore((state) => state.uploadDocument);
@@ -69,7 +71,7 @@ export default function ApplicationDetailScreen() {
       <AppHeader title={app.serviceName} showBack />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Summary Card */}

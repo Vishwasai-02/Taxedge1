@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
 import { getServiceById } from "../../data/services";
@@ -9,10 +9,12 @@ import { AppHeader } from "../../components/AppHeader";
 import { DynamicForm } from "../../components/DynamicForm";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ServiceDetailScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const service = getServiceById(id || "");
 
@@ -88,21 +90,21 @@ export default function ServiceDetailScreen() {
   if (showForm) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <SafeAreaView style={{ backgroundColor: colors.primaryDark }}>
+        <View style={{ backgroundColor: colors.primaryDark, paddingTop: insets.top }}>
           <View style={styles.formWizardHeader}>
             <TouchableOpacity onPress={() => setShowForm(false)} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
             </TouchableOpacity>
             <Text style={styles.formWizardTitle}>{service.name} Application</Text>
           </View>
-        </SafeAreaView>
+        </View>
 
         {/* Progress indicator bar at the top */}
         <View style={styles.progressBarContainer}>
           <View style={[styles.progressBarFill, { backgroundColor: colors.primary }]} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]} keyboardShouldPersistTaps="handled">
           <View style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
             <Text style={[styles.formSectionTitle, { color: colors.primary }]}>Applicant Information</Text>
             <Text style={[styles.formSectionSub, { color: colors.textSecondary }]}>Provide identity details matching official documents.</Text>
@@ -123,7 +125,7 @@ export default function ServiceDetailScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader title={service.name} showBack />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]} showsVerticalScrollIndicator={false}>
         {/* Service Header Info Block */}
         <View style={[styles.detailHero, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
           <View style={styles.heroRow}>
@@ -211,7 +213,7 @@ export default function ServiceDetailScreen() {
       </ScrollView>
 
       {/* Start Application Sticky Bottom Button */}
-      <View style={[styles.bottomButtonContainer, { backgroundColor: colors.backgroundElement, borderTopColor: colors.border }]}>
+      <View style={[styles.bottomButtonContainer, { backgroundColor: colors.backgroundElement, borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom, 12) }]}>
         <PrimaryButton
           title="Start Application"
           onPress={() => setShowForm(true)}

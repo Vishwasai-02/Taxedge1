@@ -1,9 +1,11 @@
 import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../hooks/use-theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MainLayout() {
   const colors = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -13,13 +15,16 @@ export default function MainLayout() {
         tabBarStyle: {
           backgroundColor: colors.backgroundElement,
           borderTopColor: colors.border,
-          height: 62,
-          paddingBottom: 10,
+          height: 52 + Math.max(insets.bottom, 10),
+          paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: "600",
+        },
+        tabBarItemStyle: {
+          paddingHorizontal: 2,
         },
         headerShown: false,
       }}
@@ -93,6 +98,9 @@ export default function MainLayout() {
           ),
         }}
       />
+
+      {/* Nested route, reachable by navigation but not shown as a tab */}
+      <Tabs.Screen name="gst" options={{ href: null }} />
     </Tabs>
   );
 }

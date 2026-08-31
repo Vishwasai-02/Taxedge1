@@ -15,6 +15,7 @@ import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Result } from "../../utils/functional";
 
 export default function OTPScreen() {
   const colors = useTheme();
@@ -42,34 +43,39 @@ export default function OTPScreen() {
   }, [timer]);
 
   const handleVerify = () => {
-    if (otp.length !== 6) {
-      setError("Please enter the 6-digit verification code");
-      return;
-    }
-
-    if (otp !== "123456") {
-      setError("Invalid OTP code. Please try again.");
-      return;
-    }
-
-    setError("");
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      // Perform mock login
-      login();
-      // Check store to see if login loaded a profile or not
-      const customer = useAuthStore.getState().customer;
-      if (customer) {
-        // Registered customer loaded successfully
-        Alert.alert("Login Successful", `Welcome back, ${customer.name}!`);
-        router.replace("/(main)/home");
-      } else {
-        // New customer, route to registration
-        router.push("/(auth)/register");
+    const validateOtp = (code) => {
+      if (code.length !== 6) {
+        return Result.failure("Please enter the 6-digit verification code");
       }
-    }, 1000);
+      if (code !== "123456") {
+        return Result.failure("Invalid OTP code. Please try again.");
+      }
+      return Result.success(code);
+    };
+
+    validateOtp(otp)
+      .map(() => {
+        setError("");
+        setLoading(true);
+        return otp;
+      })
+      .map(() => {
+        setTimeout(() => {
+          setLoading(false);
+          login();
+          
+          const customer = useAuthStore.getState().customer;
+          if (customer) {
+            Alert.alert("Login Successful", `Welcome back, ${customer.name}!`);
+            router.replace("/(main)/home");
+          } else {
+            router.push("/(auth)/register");
+          }
+        }, 1000);
+      })
+      .getOrElse((err) => {
+        setError(err);
+      });
   };
 
   const handleResend = () => {

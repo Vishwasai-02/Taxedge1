@@ -12,6 +12,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../hooks/use-theme";
 import { FormInput } from "./FormInput";
 import { PrimaryButton } from "./PrimaryButton";
+import { Result } from "../utils/functional";
 
 export function DynamicForm({ fields, onSubmit, submitButtonText = "Submit" }) {
   const colors = useTheme();
@@ -46,7 +47,7 @@ export function DynamicForm({ fields, onSubmit, submitButtonText = "Submit" }) {
   };
 
   const validateForm = () => {
-    const newErrors = fields.reduce((acc, field) => {
+    const validationErrors = fields.reduce((acc, field) => {
       const val = formValues[field.name];
       if (field.required && (!val || val.trim() === "")) {
         acc[field.name] = `${field.label} is required`;
@@ -54,16 +55,22 @@ export function DynamicForm({ fields, onSubmit, submitButtonText = "Submit" }) {
       return acc;
     }, {});
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(validationErrors).length === 0
+      ? Result.success(formValues)
+      : Result.failure(validationErrors);
   };
 
   const handleFormSubmit = () => {
-    if (validateForm()) {
-      onSubmit(formValues);
-    } else {
-      Alert.alert("Incomplete Form", "Please fill in all required fields.");
-    }
+    validateForm()
+      .map((values) => {
+        setErrors({});
+        onSubmit(values);
+        return values;
+      })
+      .getOrElse((validationErrors) => {
+        setErrors(validationErrors);
+        Alert.alert("Incomplete Form", "Please fill in all required fields.");
+      });
   };
 
   return (

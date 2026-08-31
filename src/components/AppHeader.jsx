@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   Platform,
   Image,
 } from "react-native";
@@ -12,6 +11,7 @@ import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../hooks/use-theme";
 import { useNotificationStore } from "../store/notificationStore";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function AppHeader({
   title,
@@ -21,9 +21,10 @@ export function AppHeader({
   const colors = useTheme();
   const router = useRouter();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={{ backgroundColor: colors.primaryDark }}>
+    <View style={{ backgroundColor: colors.primaryDark, paddingTop: insets.top }}>
       <View
         style={[
           styles.headerContainer,
@@ -73,7 +74,7 @@ export function AppHeader({
           )}
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

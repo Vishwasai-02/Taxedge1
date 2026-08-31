@@ -5,10 +5,12 @@ import { useTheme } from "../hooks/use-theme";
 import { useNotificationStore } from "../store/notificationStore";
 import { AppHeader } from "../components/AppHeader";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function NotificationsScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { notifications, markAllAsRead, markAsRead } = useNotificationStore();
 
   // Automatically mark all notifications as read when the screen is opened
@@ -42,7 +44,7 @@ export default function NotificationsScreen() {
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

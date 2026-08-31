@@ -7,20 +7,89 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
+  Image,
+  ActivityIndicator,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
 import { AppHeader } from "../../components/AppHeader";
 import { SecondaryButton } from "../../components/SecondaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const colors = useTheme();
   const router = useRouter();
-  const { customer, logout } = useAuthStore();
+  const insets = useSafeAreaInsets();
+  const { customer, logout, setAvatar } = useAuthStore();
+  const [pickingPhoto, setPickingPhoto] = useState(false);
   const [showKycModal, setShowKycModal] = useState(false);
   const [showPersonalModal, setShowPersonalModal] = useState(false);
+
+  /* Profile photo: gallery or camera, stored on the customer record. */
+  const pickFromLibrary = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert(
+        "Permission needed",
+        "Allow photo access to choose a profile picture.",
+      );
+      return;
+    }
+    setPickingPhoto(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setAvatar(result.assets[0].uri);
+      }
+    } finally {
+      setPickingPhoto(false);
+    }
+  };
+
+  const takePhoto = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Permission needed", "Allow camera access to take a photo.");
+      return;
+    }
+    setPickingPhoto(true);
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setAvatar(result.assets[0].uri);
+      }
+    } finally {
+      setPickingPhoto(false);
+    }
+  };
+
+  const handleChangePhoto = () => {
+    const options = [
+      { text: "Take Photo", onPress: takePhoto },
+      { text: "Choose from Gallery", onPress: pickFromLibrary },
+    ];
+    if (customer?.avatarUri) {
+      options.push({
+        text: "Remove Photo",
+        style: "destructive",
+        onPress: () => setAvatar(null),
+      });
+    }
+    options.push({ text: "Cancel", style: "cancel" });
+    Alert.alert("Profile Photo", "Choose a picture for your profile", options);
+  };
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to log out of TaxEdge?", [
@@ -49,7 +118,7 @@ export default function ProfileScreen() {
       <AppHeader title="My Profile" showBack={false} />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Avatar Card */}
@@ -62,13 +131,51 @@ export default function ProfileScreen() {
             },
           ]}
         >
-          <View
-            style={[styles.avatarBg, { backgroundColor: colors.orangeLight }]}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleChangePhoto}
+            style={styles.avatarWrap}
           >
-            <Text style={[styles.avatarText, { color: colors.orange }]}>
-              {customer?.name ? customer.name.charAt(0) : "C"}
-            </Text>
-          </View>
+            <View
+              style={[
+                styles.avatarBg,
+                {
+                  backgroundColor: colors.orangeLight,
+                  borderColor: colors.backgroundElement,
+                },
+              ]}
+            >
+              {customer?.avatarUri ? (
+                <Image
+                  source={{ uri: customer.avatarUri }}
+                  style={styles.avatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text style={[styles.avatarText, { color: colors.orange }]}>
+                  {customer?.name ? customer.name.charAt(0) : "C"}
+                </Text>
+              )}
+
+              {pickingPhoto && (
+                <View style={styles.avatarLoading}>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                </View>
+              )}
+            </View>
+
+            <View
+              style={[
+                styles.cameraBadge,
+                {
+                  backgroundColor: colors.primary,
+                  borderColor: colors.backgroundElement,
+                },
+              ]}
+            >
+              <Ionicons name="camera" size={14} color="#FFFFFF" />
+            </View>
+          </TouchableOpacity>
           <Text style={[styles.profileName, { color: colors.text }]}>
             {customer?.name || "Customer Profile"}
           </Text>
@@ -396,13 +503,38 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  avatarWrap: {
+    marginBottom: 12,
+  },
   avatarBg: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    overflow: "hidden",
+    borderWidth: 3,
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+  avatarLoading: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cameraBadge: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2.5,
   },
   avatarText: {
     fontSize: 28,

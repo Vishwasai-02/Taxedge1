@@ -13,10 +13,12 @@ import { useTheme } from "../../hooks/use-theme";
 import { SERVICES, CATEGORIES } from "../../data/services";
 import { AppHeader } from "../../components/AppHeader";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ServicesScreen() {
   const colors = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("ALL");
@@ -142,7 +144,7 @@ export default function ServicesScreen() {
       <FlatList
         data={filteredServices}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

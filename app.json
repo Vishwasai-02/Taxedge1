@@ -32,6 +32,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "TaxEdge uses your photos so you can set a profile picture.",
+          "cameraPermission": "TaxEdge uses your camera so you can take a profile picture."
+        }
       ]
     ],
     "experiments": {
