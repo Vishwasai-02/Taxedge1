@@ -36,7 +36,7 @@ export function AnimatedSplashOverlay() {
   const image = (
     <Image
       style={styles.image}
-      source={require("../../assets/images/expo-logo.png")}
+      source={require("../../assets/images/logo.png")}
     />
   );
 
@@ -125,7 +125,7 @@ export function AnimatedIcon() {
       >
         <Image
           style={styles.image}
-          source={require("../../assets/images/expo-logo.png")}
+          source={require("../../assets/images/logo.png")}
         />
       </Animated.View>
     </View>

@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
@@ -47,9 +48,11 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.headerSection}>
-          <View style={[styles.logoBg, { backgroundColor: colors.primary }]}>
-            <Ionicons name="briefcase" size={48} color={colors.orange} />
-          </View>
+          <Image
+            source={require("../../../assets/images/logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={[styles.brandTitle, { color: colors.primaryDark }]}>
             TAXEDGE
           </Text>
@@ -140,18 +143,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 32,
   },
-  logoBg: {
+  logoImage: {
     width: 90,
     height: 90,
     borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   brandTitle: {
     fontSize: 28,

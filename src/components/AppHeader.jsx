@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Platform,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -38,7 +39,11 @@ export function AppHeader({
               <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
             </TouchableOpacity>
           ) : (
-            <Ionicons name="briefcase" size={24} color={colors.orange} />
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={styles.miniLogo}
+              resizeMode="contain"
+            />
           )}
         </View>
 
@@ -84,6 +89,11 @@ const styles = StyleSheet.create({
     width: 40,
     alignItems: "flex-start",
     justifyContent: "center",
+  },
+  miniLogo: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
   },
   rightContainer: {
     width: 40,
