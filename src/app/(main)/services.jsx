@@ -11,7 +11,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
 import { SERVICES, CATEGORIES } from "../../data/services";
-import { AppHeader } from "../../components/AppHeader";
+import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -40,8 +40,7 @@ export default function ServicesScreen() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <AppHeader title="TaxEdge Services" showBack={false} />
+    <ScreenLayout title="TaxEdge Services">
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -144,7 +143,7 @@ export default function ServicesScreen() {
       <FlatList
         data={filteredServices}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
@@ -237,7 +236,7 @@ export default function ServicesScreen() {
           </TouchableOpacity>
         )}
       />
-    </View>
+    </ScreenLayout>
   );
 }
 

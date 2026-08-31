@@ -9,7 +9,7 @@ import {
 import { useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
 import { useApplicationStore } from "../../store/applicationStore";
-import { AppHeader } from "../../components/AppHeader";
+import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -27,8 +27,7 @@ export default function ApplicationsScreen() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <AppHeader title="My Applications" showBack={false} />
+    <ScreenLayout title="My Applications">
 
       {/* Segmented Tab Headers */}
       <View
@@ -74,7 +73,7 @@ export default function ApplicationsScreen() {
       <FlatList
         data={filteredApps}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
@@ -211,7 +210,7 @@ export default function ApplicationsScreen() {
           );
         }}
       />
-    </View>
+    </ScreenLayout>
   );
 }
 

@@ -21,6 +21,7 @@ import { useNotificationStore } from "../../store/notificationStore";
 import { ServiceCarousel } from "../../components/ServiceCarousel";
 import { SavingsJarAnimation } from "../../components/SavingsJarAnimation";
 import { SERVICE_CATALOGUE } from "../../data/catalogue";
+import { SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Maybe } from "../../utils/functional";
 
@@ -104,23 +105,23 @@ const HOME_TILES = [
 ];
 
 /* Swipeable "apply for" banners. id matches a category in data/services.js. */
-const APPLY_BANNERS = [
-  { key: "b-gst", id: "GST", title: "GST", desc: "Registration, filing & compliance", cta: "Apply Now", icon: "receipt", bg: "#0B5ED7" },
-  { key: "b-itr", id: "ITR", title: "ITR & TDS", desc: "File returns, claim your refund", cta: "File Now", icon: "calculator", bg: "#0E7490" },
-  { key: "b-loans", id: "LOANS", title: "LOANS", desc: "Explore our loan solutions", cta: "Explore", icon: "wallet", bg: "#083B75" },
-  { key: "b-ins", id: "INSURANCE", title: "INSURANCE", desc: "Health & life cover plans", cta: "Get Quote", icon: "shield-checkmark", bg: "#047857" },
-  { key: "b-company", id: "BUSINESS", title: "COMPANY SETUP", desc: "Incorporation & registrations", cta: "Start Now", icon: "business", bg: "#6D28D9" },
-  { key: "b-acct", id: "BUSINESS", title: "ACCOUNTING", desc: "Bookkeeping & monthly reports", cta: "Know More", icon: "stats-chart", bg: "#B45309" },
-];
+/* Palette is restricted to the two brand colours: navy at two depths for a bit
+   of rhythm as you swipe, and orange for the CTA and the icon. */
+const BANNER_HEIGHT = 168;
+const BANNER_NAVY = "#083B75";
+const BANNER_NAVY_DEEP = "#052750";
 
-/* serviceId is set only where a matching entry exists in data/services.js.
-   The rest open the filtered LOANS category instead of a dead /service/<id> route. */
-const LOAN_SOLUTIONS = [
-  { id: "business-loan", label: "Business Loan", desc: "Grow your business", icon: "business", serviceId: "business-loan" },
-  { id: "personal-loan", label: "Personal Loan", desc: "Fulfill your personal needs", icon: "person", serviceId: "personal-loan" },
-  { id: "home-loan", label: "Home Loan", desc: "Own your dream home", icon: "home", serviceId: null },
-  { id: "vehicle-loan", label: "Vehicle Loan", desc: "Finance your dream vehicle", icon: "car", serviceId: null },
-];
+const APPLY_BANNERS = [
+  { key: "b-gst", id: "GST", title: "GST", desc: "Registration, filing & compliance", cta: "Apply Now", icon: "receipt" },
+  { key: "b-itr", id: "ITR", title: "ITR & TDS", desc: "File returns, claim your refund", cta: "File Now", icon: "calculator" },
+  { key: "b-loans", id: "LOANS", title: "LOANS", desc: "Explore our loan solutions", cta: "Explore", icon: "wallet" },
+  { key: "b-ins", id: "INSURANCE", title: "INSURANCE", desc: "Health & life cover plans", cta: "Get Quote", icon: "shield-checkmark" },
+  { key: "b-company", id: "BUSINESS", title: "COMPANY SETUP", desc: "Incorporation & registrations", cta: "Start Now", icon: "business" },
+  { key: "b-acct", id: "BUSINESS", title: "ACCOUNTING", desc: "Bookkeeping & monthly reports", cta: "Know More", icon: "stats-chart" },
+].map((banner, i) => ({
+  ...banner,
+  bg: i % 2 === 0 ? BANNER_NAVY : BANNER_NAVY_DEEP,
+}));
 
 const MENU_ITEMS = [
   { label: "Home", icon: "home-outline", route: "/(main)/home" },
@@ -293,7 +294,7 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 32 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ---------- Apply-for banner carousel ---------- */}
@@ -314,8 +315,12 @@ export default function HomeScreen() {
                   style={[styles.loansBanner, { backgroundColor: banner.bg }]}
                 >
                   <View style={styles.bannerLeft}>
-                    <Text style={styles.bannerTitle}>{banner.title}</Text>
-                    <Text style={styles.bannerDesc}>{banner.desc}</Text>
+                    <Text style={styles.bannerTitle} numberOfLines={1}>
+                      {banner.title}
+                    </Text>
+                    <Text style={styles.bannerDesc} numberOfLines={2}>
+                      {banner.desc}
+                    </Text>
                     <View style={[styles.exploreButton, { backgroundColor: colors.orange }]}>
                       <Text style={styles.exploreText}>{banner.cta}</Text>
                       <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
@@ -330,7 +335,7 @@ export default function HomeScreen() {
 
                   <View style={styles.bannerRight}>
                     <View style={styles.bannerIconCircle}>
-                      <Ionicons name={banner.icon} size={44} color="#FFFFFF" />
+                      <Ionicons name={banner.icon} size={44} color={colors.orange} />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -383,72 +388,6 @@ export default function HomeScreen() {
             ))}
           </View>
         </View>
-
-        {/* ---------- Loan Solutions ---------- */}
-        <View style={[styles.card, styles.cardPadded, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          <View style={styles.cardHeader}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Loan Solutions</Text>
-            <TouchableOpacity onPress={() => handleExploreCategory("LOANS")} hitSlop={8}>
-              <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
-            </TouchableOpacity>
-          </View>
-
-          {LOAN_SOLUTIONS.map((loan, index) => (
-            <TouchableOpacity
-              key={loan.id}
-              activeOpacity={0.75}
-              onPress={() =>
-                loan.serviceId
-                  ? router.push(`/service/${loan.serviceId}`)
-                  : handleExploreCategory("LOANS")
-              }
-              style={[
-                styles.listRow,
-                index < LOAN_SOLUTIONS.length - 1 && {
-                  borderBottomWidth: StyleSheet.hairlineWidth,
-                  borderBottomColor: colors.border,
-                },
-              ]}
-            >
-              <View style={[styles.listIconCircle, { backgroundColor: colors.orangeLight }]}>
-                <Ionicons name={loan.icon} size={20} color={colors.orange} />
-              </View>
-              <View style={styles.listRowText}>
-                <Text style={[styles.listRowTitle, { color: colors.text }]}>{loan.label}</Text>
-                <Text style={[styles.listRowDesc, { color: colors.textSecondary }]}>{loan.desc}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* ---------- Action required ---------- */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => router.push("/(main)/profile")}
-          style={[
-            styles.actionCard,
-            {
-              backgroundColor: isDark ? colors.backgroundElement : "#FEF7F0",
-              borderColor: isDark ? colors.border : "#FBE0C6",
-            },
-          ]}
-        >
-          <View style={[styles.actionIconBox, { backgroundColor: colors.orangeLight }]}>
-            <Ionicons name="document-text" size={22} color={colors.orange} />
-          </View>
-          <View style={styles.actionText}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Action Required</Text>
-            <Text style={[styles.actionSubtitle, { color: colors.text }]}>KYC Documents Expiring</Text>
-            <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>Your PAN is expiring in 12 days.</Text>
-          </View>
-          <View style={styles.actionRight}>
-            <View style={[styles.countBadge, { backgroundColor: colors.orange }]}>
-              <Text style={styles.countBadgeText}>2</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-          </View>
-        </TouchableOpacity>
 
         {/* ---------- Stats grid ---------- */}
         <View style={styles.statsGrid}>
@@ -888,6 +827,9 @@ const styles = StyleSheet.create({
 
   /* Banner */
   loansBanner: {
+    // Fixed height: the slides carry different amounts of text, and without
+    // this the carousel changed size as you swiped.
+    height: BANNER_HEIGHT,
     borderRadius: 16,
     padding: 20,
     flexDirection: "row",
@@ -909,7 +851,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   bannerDesc: {
-    color: "#D7E3F2",
+    color: "#C9D8EC",
     fontSize: 13.5,
     marginTop: 5,
     fontWeight: "600",
@@ -937,13 +879,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
-    opacity: 0.28,
+    opacity: 0.55,
   },
   decorDot: {
     width: 3,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F97316",
   },
   bannerRight: {
     flex: 0.9,
@@ -953,7 +895,7 @@ const styles = StyleSheet.create({
     width: 84,
     height: 84,
     borderRadius: 42,
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(249,115,22,0.16)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -966,12 +908,6 @@ const styles = StyleSheet.create({
   },
   cardPadded: {
     paddingHorizontal: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 6,
   },
   cardTitle: {
     fontSize: 16,
@@ -1128,31 +1064,6 @@ const styles = StyleSheet.create({
   },
 
   /* List rows */
-  listRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingVertical: 14,
-  },
-  listIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  listRowText: {
-    flex: 1,
-  },
-  listRowTitle: {
-    fontSize: 14.5,
-    fontWeight: "700",
-  },
-  listRowDesc: {
-    fontSize: 12.5,
-    fontWeight: "500",
-    marginTop: 3,
-  },
   emptyText: {
     fontSize: 13,
     fontWeight: "500",
@@ -1161,55 +1072,6 @@ const styles = StyleSheet.create({
   },
 
   /* Action required */
-  actionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-  },
-  actionIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  actionText: {
-    flex: 1,
-  },
-  actionTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-  },
-  actionSubtitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    marginTop: 3,
-  },
-  actionDesc: {
-    fontSize: 12,
-    fontWeight: "500",
-    marginTop: 2,
-  },
-  actionRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  countBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  countBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "800",
-  },
 
   /* Stats grid */
   statsGrid: {

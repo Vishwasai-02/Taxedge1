@@ -1,105 +1,34 @@
 import { Tabs } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../hooks/use-theme";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FloatingTabBar } from "../../components/FloatingTabBar";
 
+/**
+ * The default tab bar is replaced by <FloatingTabBar> through the `tabBar`
+ * prop, so routing still comes from expo-router / React Navigation - there is
+ * no second navigation system. Screens keep their own names and paths.
+ *
+ * Every screen wraps its content in <ScreenLayout>, which supplies the shared
+ * header and the bottom padding that clears the floating bar.
+ */
 export default function MainLayout() {
   const colors = useTheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: {
-          backgroundColor: colors.backgroundElement,
-          borderTopColor: colors.border,
-          height: 52 + Math.max(insets.bottom, 10),
-          paddingBottom: Math.max(insets.bottom, 10),
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "600",
-        },
-        tabBarItemStyle: {
-          paddingHorizontal: 2,
-        },
         headerShown: false,
+        // Screens own their bottom clearance through SCREEN_BOTTOM_PADDING,
+        // so the scene itself is full-bleed and never resizes between tabs.
+        sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "home" : "home-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="services"
-        options={{
-          title: "Services",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "grid" : "grid-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="applications"
-        options={{
-          title: "Applications",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "document-text" : "document-text-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="payments"
-        options={{
-          title: "Payments",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "cash" : "cash-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      {/* Nested route, reachable by navigation but not shown as a tab */}
+      <Tabs.Screen name="home" options={{ title: "Home" }} />
+      <Tabs.Screen name="services" options={{ title: "Services" }} />
+      <Tabs.Screen name="applications" options={{ title: "Applications" }} />
+      <Tabs.Screen name="payments" options={{ title: "Payments" }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      {/* Nested route: reachable by navigation, not shown in the tab bar. */}
       <Tabs.Screen name="gst" options={{ href: null }} />
     </Tabs>
   );

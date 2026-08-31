@@ -14,7 +14,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
-import { AppHeader } from "../../components/AppHeader";
+import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import { SecondaryButton } from "../../components/SecondaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -113,11 +113,10 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <AppHeader title="My Profile" showBack={false} />
+    <ScreenLayout title="My Profile">
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Avatar Card */}
@@ -384,7 +383,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScreenLayout>
   );
 }
 

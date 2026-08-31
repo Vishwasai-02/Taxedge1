@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '../../hooks/use-theme';
 import { useApplicationStore } from '../../store/applicationStore';
 import { useNotificationStore } from '../../store/notificationStore';
-import { AppHeader } from '../../components/AppHeader';
+import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { SecondaryButton } from '../../components/SecondaryButton';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -61,10 +61,9 @@ export default function PaymentsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <AppHeader title="Payments" showBack={false} />
+    <ScreenLayout title="Payments">
       
-      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]} showsVerticalScrollIndicator={false}>
         
         {/* Main Unified Invoice Statement Card (Mockup Card 8) */}
         <View style={[styles.invoiceStatementCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
@@ -251,7 +250,7 @@ export default function PaymentsScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScreenLayout>
   );
 }
 
