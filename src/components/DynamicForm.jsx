@@ -46,13 +46,13 @@ export function DynamicForm({ fields, onSubmit, submitButtonText = "Submit" }) {
   };
 
   const validateForm = () => {
-    const newErrors = {};
-    fields.forEach((field) => {
+    const newErrors = fields.reduce((acc, field) => {
       const val = formValues[field.name];
       if (field.required && (!val || val.trim() === "")) {
-        newErrors[field.name] = `${field.label} is required`;
+        acc[field.name] = `${field.label} is required`;
       }
-    });
+      return acc;
+    }, {});
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

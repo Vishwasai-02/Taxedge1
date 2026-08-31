@@ -40,7 +40,7 @@ export default function PaymentsScreen() {
     setIsProcessing(true);
     setTimeout(() => {
       // Complete payment for all pending applications in store
-      pendingPayments.forEach(app => {
+      pendingPayments.map(app => {
         payApplication(app.id);
         
         // Add notification for each
@@ -49,6 +49,7 @@ export default function PaymentsScreen() {
           `Received ₹${app.paymentAmount.toLocaleString()} for ${app.serviceName} (${app.id}).`,
           'payment'
         );
+        return null;
       });
 
       setIsProcessing(false);

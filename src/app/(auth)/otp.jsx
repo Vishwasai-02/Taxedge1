@@ -82,11 +82,10 @@ export default function OTPScreen() {
   };
 
   const renderOtpBoxes = () => {
-    const boxes = [];
-    for (let i = 0; i < 6; i++) {
+    return Array.from({ length: 6 }).map((_, i) => {
       const char = otp[i] || "";
       const isCurrent = i === otp.length;
-      boxes.push(
+      return (
         <View
           key={i}
           style={[
@@ -104,10 +103,9 @@ export default function OTPScreen() {
           <Text style={[styles.otpBoxText, { color: colors.text }]}>
             {char}
           </Text>
-        </View>,
+        </View>
       );
-    }
-    return boxes;
+    });
   };
 
   return (
