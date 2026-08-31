@@ -18,6 +18,9 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
+          <Stack.Screen name="service/gst" />
+          <Stack.Screen name="service/itr" />
+          <Stack.Screen name="service/loans" />
           <Stack.Screen name="service/[id]" />
           <Stack.Screen name="application/[id]" />
           <Stack.Screen name="chat/support" />

@@ -32,10 +32,10 @@ const CARD_WIDTH = width - H_PADDING * 2;
 /* Full service catalogue. The first five are the primary row; the rest fill the
    swipeable pages and the "All Services" sheet. Every route resolves to a real screen. */
 const SERVICE_TILES = [
-  { id: "gst", label: "GST", icon: "document-text", tint: "#2563EB", tintBg: "#EAF1FE", route: "/(main)/gst" },
-  { id: "itr", label: "ITR", icon: "reader", tint: "#0F766E", tintBg: "#E6F5F2", route: "/service/itr-filing" },
+  { id: "gst", label: "GST", icon: "document-text", tint: "#2563EB", tintBg: "#EAF1FE", route: "/service/gst" },
+  { id: "itr", label: "ITR", icon: "reader", tint: "#0F766E", tintBg: "#E6F5F2", route: "/service/itr" },
   { id: "tds", label: "TDS", icon: "calculator", tint: "#6D28D9", tintBg: "#F1ECFE", route: "/service/tds-refund" },
-  { id: "loans", label: "Loans", icon: "business", tint: "#EA580C", tintBg: "#FEF0E6", route: "/service/business-loan" },
+  { id: "loans", label: "Loans", icon: "business", tint: "#EA580C", tintBg: "#FEF0E6", route: "/service/loans" },
   { id: "insurance", label: "Insurance", icon: "shield-checkmark", tint: "#DC2626", tintBg: "#FDEBEB", route: "/service/health-insurance" },
 
   { id: "accounting", label: "Accounting", icon: "stats-chart", tint: "#0369A1", tintBg: "#E6F0F9", route: "/service/accounting-bookkeeping" },
@@ -95,13 +95,12 @@ const MORE_TILE = {
   isMore: true,
 };
 
-/* The home row is fixed: GST / ITR / TDS / Loans and the More entry, which opens
-   the full catalogue in a sheet. Nothing scrolls here. */
+/* The home row has ONLY 4 Quick Services: GST / ITR / Loans / More Services */
 const HOME_TILES = [
-  SERVICE_TILES[0], // GST
-  SERVICE_TILES[1], // ITR
-  SERVICE_TILES[3], // Loans
-  { ...MORE_TILE, label: "More" },
+  SERVICE_TILES[0], // GST -> /service/gst
+  SERVICE_TILES[1], // ITR -> /service/itr
+  SERVICE_TILES[3], // Loans -> /service/loans
+  { ...MORE_TILE, label: "More\nServices" },
 ];
 
 /* Swipeable "apply for" banners. id matches a category in data/services.js. */
