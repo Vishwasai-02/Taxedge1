@@ -1,12 +1,12 @@
 import { Image } from "expo-image";
 import * as SplashScreen from "expo-splash-screen";
-import { useState } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import React, { useState } from "react";
+import { Dimensions, StyleSheet, View, Text } from "react-native";
 import Animated, { Easing, Keyframe } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
 const INITIAL_SCALE_FACTOR = Dimensions.get("screen").height / 90;
-const DURATION = 600;
+const DURATION = 800;
 
 export function AnimatedSplashOverlay() {
   const [animate, setAnimate] = useState(false);
@@ -16,28 +16,35 @@ export function AnimatedSplashOverlay() {
 
   const splashKeyframe = new Keyframe({
     0: {
+      opacity: 1,
       transform: [{ scale: 1 }],
-      opacity: 1,
     },
-    20: {
+    30: {
       opacity: 1,
-    },
-    70: {
-      opacity: 0,
-      easing: Easing.elastic(0.7),
+      transform: [{ scale: 1.05 }],
     },
     100: {
       opacity: 0,
-      transform: [{ scale: 1 }],
-      easing: Easing.elastic(0.7),
+      transform: [{ scale: 0.95 }],
+      easing: Easing.out(Easing.ease),
     },
   });
 
-  const image = (
-    <Image
-      style={styles.image}
-      source={require("../../assets/images/logo.png")}
-    />
+  const renderContent = () => (
+    <View style={styles.splashContent}>
+      <Image
+        style={styles.splashLogo}
+        source={require("../../assets/images/logo.png")}
+        contentFit="contain"
+      />
+      <Text style={styles.splashTitle}>TAXEDGE</Text>
+      <Text style={styles.splashSubtitle}>FIN SOLUTIONS</Text>
+      
+      {/* Orange accent line */}
+      <View style={styles.accentLine} />
+
+      <Text style={styles.splashFooter}>GST  •  ITR  •  LOANS  •  INSURANCE</Text>
+    </View>
   );
 
   return animate ? (
@@ -50,7 +57,7 @@ export function AnimatedSplashOverlay() {
       })}
       style={styles.splashOverlay}
     >
-      {image}
+      {renderContent()}
     </Animated.View>
   ) : (
     <View
@@ -61,7 +68,7 @@ export function AnimatedSplashOverlay() {
       }}
       style={styles.splashOverlay}
     >
-      {image}
+      {renderContent()}
     </View>
   );
 }
@@ -162,9 +169,55 @@ const styles = StyleSheet.create({
   },
   splashOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "#208AEF",
+    backgroundColor: "#083B75", // Deep Dark Blue Background
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
+  },
+  splashContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    height: "100%",
+  },
+  splashLogo: {
+    width: 130,
+    height: 130,
+    borderRadius: 28,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  splashTitle: {
+    color: "#FFFFFF",
+    fontSize: 34,
+    fontWeight: "900",
+    letterSpacing: 4,
+  },
+  splashSubtitle: {
+    color: "#F97316", // Accent Orange Color
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 6,
+    marginTop: 6,
+    paddingLeft: 6, // to balance the letterSpacing offset on the right
+  },
+  accentLine: {
+    width: 60,
+    height: 3,
+    backgroundColor: "#F97316",
+    borderRadius: 1.5,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  splashFooter: {
+    color: "#CBD5E1",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+    position: "absolute",
+    bottom: 50,
   },
 });
