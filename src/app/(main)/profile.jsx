@@ -26,7 +26,6 @@ export default function ProfileScreen() {
   const { customer, logout, setAvatar } = useAuthStore();
   const [pickingPhoto, setPickingPhoto] = useState(false);
   const [showKycModal, setShowKycModal] = useState(false);
-  const [showPersonalModal, setShowPersonalModal] = useState(false);
 
   /* Profile photo: gallery or camera, stored on the customer record. */
   const pickFromLibrary = async () => {
@@ -199,28 +198,6 @@ export default function ProfileScreen() {
         <View style={styles.menuList}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setShowPersonalModal(true)}
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons name="person-outline" size={20} color={colors.primary} />
-            <Text style={[styles.menuText, { color: colors.text }]}>
-              Personal Information
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
             onPress={() => setShowKycModal(true)}
             style={[
               styles.menuItem,
@@ -331,78 +308,6 @@ export default function ProfileScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-
-      {/* Personal Info Modal */}
-      <Modal
-        visible={showPersonalModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowPersonalModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modalContainer,
-              { backgroundColor: colors.backgroundElement },
-            ]}
-          >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Personal Information
-            </Text>
-
-            <View style={styles.modalBody}>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  Full Name
-                </Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>
-                  {customer?.name}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  Phone Number
-                </Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>
-                  +91 {customer?.mobile}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  Email Address
-                </Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>
-                  {customer?.email}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  Date of Birth
-                </Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>
-                  {customer?.dob}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  Address
-                </Text>
-                <Text
-                  style={[styles.infoValue, { color: colors.text }]}
-                  numberOfLines={3}
-                >
-                  {customer?.address}
-                </Text>
-              </View>
-            </View>
-
-            <SecondaryButton
-              title="Close"
-              onPress={() => setShowPersonalModal(false)}
-            />
-          </View>
-        </View>
-      </Modal>
 
       {/* KYC Modal */}
       <Modal

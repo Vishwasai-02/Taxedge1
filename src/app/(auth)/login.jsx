@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
@@ -116,6 +117,33 @@ export default function LoginScreen() {
             style={styles.continueBtn}
           />
 
+          {/* Divider */}
+          <View style={styles.dividerRow}>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>
+              New to TaxEdge?
+            </Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+          </View>
+
+          {/* Straight to registration, skipping the OTP step */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => {
+              if (/^[0-9]{10}$/.test(mobile)) setMobileNumber(mobile);
+              router.push("/(auth)/register");
+            }}
+            style={[
+              styles.createBtn,
+              { borderColor: colors.primary, backgroundColor: colors.background },
+            ]}
+          >
+            <Ionicons name="person-add-outline" size={18} color={colors.primary} />
+            <Text style={[styles.createBtnText, { color: colors.primary }]}>
+              Create New Account
+            </Text>
+          </TouchableOpacity>
+
           <View style={styles.hintContainer}>
             <Text style={[styles.hintText, { color: colors.textSecondary }]}>
               For testing, use{" "}
@@ -206,6 +234,34 @@ const styles = StyleSheet.create({
   },
   continueBtn: {
     marginTop: 16,
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 22,
+    marginBottom: 18,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  createBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 50,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  createBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
   },
   hintContainer: {
     marginTop: 20,
