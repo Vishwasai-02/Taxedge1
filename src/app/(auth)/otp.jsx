@@ -44,11 +44,8 @@ export default function OTPScreen() {
 
   const handleVerify = () => {
     const validateOtp = (code) => {
-      if (code.length !== 6) {
+      if (code.length !== 6 || !/^\d{6}$/.test(code)) {
         return Result.failure("Please enter the 6-digit verification code");
-      }
-      if (code !== "123456") {
-        return Result.failure("Invalid OTP code. Please try again.");
       }
       return Result.success(code);
     };
@@ -63,15 +60,8 @@ export default function OTPScreen() {
         setTimeout(() => {
           setLoading(false);
           login();
-          
-          const customer = useAuthStore.getState().customer;
-          if (customer) {
-            Alert.alert("Login Successful", `Welcome back, ${customer.name}!`);
-            router.replace("/(main)/home");
-          } else {
-            router.push("/(auth)/register");
-          }
-        }, 1000);
+          router.replace("/(main)/home");
+        }, 600);
       })
       .getOrElse((err) => {
         setError(err);
@@ -197,14 +187,6 @@ export default function OTPScreen() {
             )}
           </View>
 
-          <View style={styles.hintContainer}>
-            <Text style={[styles.hintText, { color: colors.textSecondary }]}>
-              Enter Dev OTP:{" "}
-              <Text style={{ fontWeight: "700", color: colors.text }}>
-                123456
-              </Text>
-            </Text>
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -301,14 +283,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
   },
-  hintContainer: {
-    marginTop: 20,
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#00000005",
-    alignItems: "center",
-  },
-  hintText: {
-    fontSize: 12,
-  },
+
 });

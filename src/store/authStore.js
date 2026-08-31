@@ -7,25 +7,21 @@ export const useAuthStore = create((set) => ({
   setMobileNumber: (mobile) => set({ mobileNumber: mobile }),
   login: () =>
     set((state) => {
-      // If the logging in mobile matches a preloaded customer (let's say we mock a default profile if they enter +91 9876543210)
-      if (state.mobileNumber === "9876543210") {
-        return {
-          isLoggedIn: true,
-          customer: {
-            name: "Priya Sharma",
-            mobile: "9876543210",
-            email: "priya.sharma@example.com",
-            dob: "1992-05-15",
-            pan: "ABCPS1234E",
-            aadhaar: "1234 5678 9012",
-            address: "Flat 402, Sunshine Heights, Mumbai - 400001",
-            customerType: "Salaried",
-            customerId: "CUST-2026-00001",
-          },
-        };
-      }
-      // If new number, they will need to register, so we just set state and register will generate the profile.
-      return { isLoggedIn: false }; // wait, register handles this.
+      const mob = state.mobileNumber || "9876543210";
+      return {
+        isLoggedIn: true,
+        customer: {
+          name: state.mobileNumber === "9876543210" ? "Priya Sharma" : "TaxEdge Client",
+          mobile: mob,
+          email: `${mob}@taxedge.in`,
+          dob: "1992-05-15",
+          pan: "ABCPS1234E",
+          aadhaar: "1234 5678 9012",
+          address: "Flat 402, Sunshine Heights, Mumbai - 400001",
+          customerType: "Salaried",
+          customerId: "CUST-2026-" + mob.slice(-5),
+        },
+      };
     }),
   register: (profile) =>
     set((state) => {
