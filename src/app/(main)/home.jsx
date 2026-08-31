@@ -10,7 +10,6 @@ import {
   Modal,
   Pressable,
   StatusBar,
-  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -197,21 +196,6 @@ export default function HomeScreen() {
     router.push(route);
   };
 
-  /* Support chat needs a real application to attach to; otherwise show contact details. */
-  const handleNeedHelp = () => {
-    const latest = applications[0];
-    if (latest) {
-      useApplicationStore.getState().setSelectedApplicationId(latest.id);
-      router.push(`/chat/${latest.id}`);
-      return;
-    }
-    Alert.alert(
-      "Need Help?",
-      "Our experts are available 24/7.\n\nEmail: support@taxedge.com\nToll free: 1800-TAX-EDGE",
-      [{ text: "OK" }],
-    );
-  };
-
   const openCatalogueItem = (item, categoryId) => {
     setMoreOpen(false);
     if (item.serviceId) {
@@ -353,28 +337,7 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
             ))}
-    
-        {/* ---------- Need help ---------- */}
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={handleNeedHelp}
-          style={styles.helpCard}
-        >
-          <View style={styles.helpIcon}>
-            <Ionicons name="chatbubble-ellipses" size={22} color="#FFFFFF" />
-          </View>
-
-          <View style={styles.helpText}>
-            <Text style={styles.helpTitle}>Need Help?</Text>
-            <Text style={styles.helpDesc}>Our experts are available 24/7</Text>
-          </View>
-
-          <View style={styles.helpBtn}>
-            <Text style={styles.helpBtnText}>Chat</Text>
-          </View>
-        </TouchableOpacity>
-
-      </ScrollView>
+          </ScrollView>
 
           <View style={styles.dotsRow}>
             {APPLY_BANNERS.map((b, i) => (
@@ -620,6 +583,26 @@ export default function HomeScreen() {
             );
           })
         )}
+
+        {/* ---------- Need help ---------- */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => router.push("/chat/support")}
+          style={styles.helpCard}
+        >
+          <View style={styles.helpIcon}>
+            <Ionicons name="chatbubble-ellipses" size={22} color="#FFFFFF" />
+          </View>
+
+          <View style={styles.helpText}>
+            <Text style={styles.helpTitle}>Need Help?</Text>
+            <Text style={styles.helpDesc}>Our experts are available 24/7</Text>
+          </View>
+
+          <View style={styles.helpBtn}>
+            <Text style={styles.helpBtnText}>Chat</Text>
+          </View>
+        </TouchableOpacity>
 
       </ScrollView>
 

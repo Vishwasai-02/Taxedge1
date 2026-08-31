@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../hooks/use-theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSupportStore } from "../../store/supportStore";
 
 /**
  * General support chat, not tied to any application.
@@ -29,38 +30,15 @@ const QUICK_REPLIES = [
   "Talk to an expert",
 ];
 
-const now = () =>
-  new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-
-const OPENING = [
-  {
-    id: "m1",
-    sender: "staff",
-    text: "Hi! You're through to TaxEdge support. How can we help you today?",
-    timestamp: now(),
-  },
-];
-
-/* Canned routing so the thread behaves sensibly without a backend. */
-function replyTo(text) {
-  const q = text.toLowerCase();
-  if (q.includes("track") || q.includes("status") || q.includes("application"))
-    return "You can track every filing under the Applications tab. Share the application ID and I'll pull up its current stage.";
-  if (q.includes("document") || q.includes("upload") || q.includes("kyc"))
-    return "Open the application and use Upload against any pending document. PAN, Aadhaar and bank proof are the usual ones we ask for.";
-  if (q.includes("payment") || q.includes("refund") || q.includes("invoice"))
-    return "I can see your dues under the Payments tab. Tell me which invoice looks wrong and I'll check it.";
-  if (q.includes("expert") || q.includes("call") || q.includes("talk"))
-    return "Sure - an expert will call you on your registered number within 30 minutes. Anything specific they should prepare?";
-  return "Thanks for reaching out. A TaxEdge executive will pick this up shortly. Meanwhile you can reach us on 1800-TAX-EDGE.";
-}
-
 export default function SupportChatScreen() {
   const colors = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const [messages, setMessages] = useState(OPENING);
+  const messages = useSupportStore((state) => state.messages);
+  const sendMessage = useSupportStore((state) => state.sendMessage);
+  const receiveReply = useSupportStore((state) => state.receiveReply);
+
   const [inputMessage, setInputMessage] = useState("");
   const scrollViewRef = useRef(null);
   const replyTimer = useRef(null);
@@ -74,22 +52,13 @@ export default function SupportChatScreen() {
   useEffect(() => () => clearTimeout(replyTimer.current), []);
 
   const send = (raw) => {
-    const text = raw.trim();
+    const text = sendMessage(raw);
     if (!text) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: `u${Date.now()}`, sender: "user", text, timestamp: now() },
-    ]);
     setInputMessage("");
 
     clearTimeout(replyTimer.current);
-    replyTimer.current = setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: `s${Date.now()}`, sender: "staff", text: replyTo(text), timestamp: now() },
-      ]);
-    }, 900);
+    replyTimer.current = setTimeout(() => receiveReply(text), 900);
   };
 
   const showQuickReplies = messages.length === 1;
