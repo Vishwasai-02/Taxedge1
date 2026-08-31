@@ -18,7 +18,6 @@ import { useColorScheme } from "../../hooks/use-color-scheme";
 import { useAuthStore } from "../../store/authStore";
 import { useApplicationStore } from "../../store/applicationStore";
 import { useNotificationStore } from "../../store/notificationStore";
-import { ServiceCarousel } from "../../components/ServiceCarousel";
 import { SavingsJarAnimation } from "../../components/SavingsJarAnimation";
 import { SERVICE_CATALOGUE } from "../../data/catalogue";
 import { SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
@@ -454,15 +453,6 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* ---------- Core categories ---------- */}
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Core Service Categories</Text>
-          <TouchableOpacity onPress={() => router.push("/(main)/services")} hitSlop={8}>
-            <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
-          </TouchableOpacity>
-        </View>
-        <ServiceCarousel onExplore={handleExploreCategory} />
 
         {/* ---------- Recent applications ---------- */}
         <View style={styles.sectionHeader}>
