@@ -5,14 +5,19 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Image,
+  Dimensions,
+  SafeAreaView,
+  StatusBar
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
 import { useApplicationStore } from "../../store/applicationStore";
-import { AppHeader } from "../../components/AppHeader";
 import { ServiceCarousel } from "../../components/ServiceCarousel";
 import Ionicons from "@expo/vector-icons/Ionicons";
+
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const colors = useTheme();
@@ -21,25 +26,15 @@ export default function HomeScreen() {
   const applications = useApplicationStore((state) => state.applications);
 
   // Dynamic calculations from stores
-  const activeCount = applications.filter(
-    (app) => app.status !== "Completed",
-  ).length;
-  const completedCount = applications.filter(
-    (app) => app.status === "Completed",
-  ).length;
+  const activeCount = applications.filter((app) => app.status !== "Completed").length;
   const pendingDocsCount = applications.reduce(
-    (sum, app) =>
-      sum + app.documents.filter((d) => d.status === "Pending").length,
-    0,
+    (sum, app) => sum + app.documents.filter((d) => d.status === "Pending").length,
+    0
   );
-  const pendingPaymentSum = applications
-    .filter((app) => app.paymentStatus === "Pending")
-    .reduce((sum, app) => sum + app.paymentAmount, 0);
-
+  
   const recentApps = applications.slice(0, 3);
 
   const handleExploreCategory = (categoryId) => {
-    // Navigate to Services tab, passing the category id
     router.push({
       pathname: "/(main)/services",
       params: { selectedCategory: categoryId },
@@ -48,181 +43,160 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <AppHeader title="TaxEdge Dashboard" showBack={false} />
+      <StatusBar barStyle="light-content" />
+
+      {/* Hero Blue Header Container */}
+      <View style={[styles.heroHeader, { backgroundColor: colors.primaryDark }]}>
+        <SafeAreaView>
+          {/* Top Brand Header Row */}
+          <View style={styles.topHeaderRow}>
+            <View style={styles.brandContainer}>
+              <Image 
+                source={require("../../../assets/images/logo.png")} 
+                style={styles.logo}
+                resizeMode="contain" 
+              />
+              <Text style={styles.brandText}>TAXEDGE</Text>
+            </View>
+            <View style={styles.headerIcons}>
+              <TouchableOpacity onPress={() => router.push("/notifications")} style={styles.iconBtn}>
+                <Ionicons name="notifications-outline" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push("/(main)/profile")} style={styles.iconBtn}>
+                <Ionicons name="person-circle-outline" size={26} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Hello greeting Section */}
+          <View style={styles.greetingContainer}>
+            <Text style={styles.welcomeText}>Hello, {customer?.name ? customer.name.split(" ")[0] : "Priya"} 👋</Text>
+            <Text style={styles.welcomeSubText}>What can we help you with today?</Text>
+          </View>
+        </SafeAreaView>
+      </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <Text style={[styles.welcomeText, { color: colors.text }]}>
-            Welcome back, {customer?.name || "Customer"}! 👋
-          </Text>
-          <Text
-            style={[styles.welcomeSubText, { color: colors.textSecondary }]}
-          >
-            Manage your financial needs and filings easily
-          </Text>
-        </View>
-
-        {/* Statistics Grid */}
-        <View style={styles.statsGrid}>
-          <View
-            style={[
-              styles.statCard,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={[styles.statIconBg, { backgroundColor: "#E0F2FE" }]}>
-              <Ionicons name="folder-open-outline" size={20} color="#0284C7" />
-            </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              {activeCount}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Active Apps
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.statCard,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.statIconBg,
-                { backgroundColor: colors.orangeLight },
-              ]}
-            >
-              <Ionicons
-                name="alert-circle-outline"
-                size={20}
-                color={colors.orange}
-              />
-            </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              {pendingDocsCount}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Pending Docs
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.statCard,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={[styles.statIconBg, { backgroundColor: "#FEE2E2" }]}>
-              <Ionicons name="wallet-outline" size={20} color="#DC2626" />
-            </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              ₹{pendingPaymentSum.toLocaleString()}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Due Fees
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.statCard,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={[styles.statIconBg, { backgroundColor: "#DCFCE7" }]}>
-              <Ionicons
-                name="checkmark-done-circle-outline"
-                size={20}
-                color="#16A34A"
-              />
-            </View>
-            <Text style={[styles.statValue, { color: colors.text }]}>
-              {completedCount}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-              Completed
-            </Text>
-          </View>
-        </View>
-
-        {/* Due Reminder Card */}
-        <View
-          style={[styles.reminderCard, { backgroundColor: colors.primaryDark }]}
+        {/* Banner Section: LOANS */}
+        <TouchableOpacity 
+          activeOpacity={0.9}
+          onPress={() => handleExploreCategory("LOANS")}
+          style={[styles.loansBanner, { backgroundColor: colors.primary }]}
         >
-          <View style={styles.reminderHeader}>
-            <Ionicons name="time-outline" size={22} color={colors.orange} />
-            <Text style={styles.reminderTitle}>UPCOMING DEADLINE</Text>
+          <View style={styles.bannerLeft}>
+            <Text style={styles.bannerTitle}>LOANS</Text>
+            <Text style={styles.bannerDesc}>Explore our loan solutions</Text>
+            <View style={[styles.exploreButton, { backgroundColor: colors.orange }]}>
+              <Text style={styles.exploreText}>Explore</Text>
+              <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
+            </View>
           </View>
-          <Text style={styles.reminderText}>
-            GST Filing (GSTR-3B) for August 2026 is due shortly.
-          </Text>
-          <View style={styles.reminderFooter}>
-            <Text style={styles.reminderDays}>Due in 5 Days</Text>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => router.push("/service/gst-filing")}
-              style={[styles.reminderBtn, { backgroundColor: colors.orange }]}
-            >
-              <Text style={styles.reminderBtnText}>File Now</Text>
-            </TouchableOpacity>
+          <View style={styles.bannerRight}>
+            <Ionicons name="cash-outline" size={72} color={colors.orangeLight} />
           </View>
-        </View>
+        </TouchableOpacity>
 
-        {/* Services Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Explore Services
-          </Text>
-          <TouchableOpacity onPress={() => router.push("/(main)/services")}>
-            <Text style={[styles.seeAllText, { color: colors.primary }]}>
-              View All
-            </Text>
+        {/* Quick Circular Category Links */}
+        <View style={styles.quickLinksGrid}>
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={() => router.push("/service/business-loan")}
+            style={styles.quickLinkItem}
+          >
+            <View style={[styles.circleIcon, { backgroundColor: colors.orangeLight }]}>
+              <Ionicons name="business" size={22} color={colors.primary} />
+            </View>
+            <Text style={[styles.circleLabel, { color: colors.text }]} numberOfLines={2}>Business Loan</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={() => router.push("/service/personal-loan")}
+            style={styles.quickLinkItem}
+          >
+            <View style={[styles.circleIcon, { backgroundColor: colors.orangeLight }]}>
+              <Ionicons name="person" size={22} color={colors.primary} />
+            </View>
+            <Text style={[styles.circleLabel, { color: colors.text }]} numberOfLines={2}>Personal Loan</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={() => router.push("/service/working-capital")}
+            style={styles.quickLinkItem}
+          >
+            <View style={[styles.circleIcon, { backgroundColor: colors.orangeLight }]}>
+              <Ionicons name="home" size={22} color={colors.primary} />
+            </View>
+            <Text style={[styles.circleLabel, { color: colors.text }]} numberOfLines={2}>Home Loan</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={() => router.push({ pathname: "/(main)/services", params: { selectedCategory: "LOANS" } })}
+            style={styles.quickLinkItem}
+          >
+            <View style={[styles.circleIcon, { backgroundColor: colors.orangeLight }]}>
+              <Ionicons name="car" size={22} color={colors.primary} />
+            </View>
+            <Text style={[styles.circleLabel, { color: colors.text }]} numberOfLines={2}>Vehicle Loan</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Swipe Carousel */}
+        {/* Side-by-side Statistics Cards */}
+        <View style={styles.statsRow}>
+          <View style={[styles.statsCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+            <Text style={[styles.statsNumber, { color: colors.primary }]}>
+              {activeCount < 10 ? `0${activeCount}` : activeCount}
+            </Text>
+            <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Active Applications</Text>
+          </View>
+
+          <View style={[styles.statsCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+            <Text style={[styles.statsNumber, { color: colors.orange }]}>
+              {pendingDocsCount < 10 ? `0${pendingDocsCount}` : pendingDocsCount}
+            </Text>
+            <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Pending Documents</Text>
+          </View>
+        </View>
+
+        {/* Compliance due banner card */}
+        <View style={[styles.complianceCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <View style={styles.complianceLeft}>
+            <Text style={[styles.complianceTitle, { color: colors.textSecondary }]}>Upcoming Compliance</Text>
+            <Text style={[styles.complianceDesc, { color: colors.text }]}>GSTR-3B <Text style={{ color: colors.error, fontWeight: "600" }}>Due in 5 Days</Text></Text>
+          </View>
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={() => router.push("/service/gst-filing")}
+            style={styles.complianceBtn}
+          >
+            <Text style={[styles.complianceBtnText, { color: colors.primary }]}>File Now →</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Explore Services Slider Header */}
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>CORE SERVICE CATEGORIES</Text>
+          <TouchableOpacity onPress={() => router.push("/(main)/services")}>
+            <Text style={[styles.seeAllText, { color: colors.primary }]}>View All</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Carousel */}
         <ServiceCarousel onExplore={handleExploreCategory} />
 
         {/* Recent Applications Section */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Recent Applications
-          </Text>
-          <TouchableOpacity onPress={() => router.push("/(main)/applications")}>
-            <Text style={[styles.seeAllText, { color: colors.primary }]}>
-              All Applications
-            </Text>
-          </TouchableOpacity>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Applications</Text>
         </View>
 
         <View style={styles.recentList}>
           {recentApps.length === 0 ? (
-            <View
-              style={[
-                styles.emptyCard,
-                {
-                  backgroundColor: colors.backgroundElement,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
+            <View style={[styles.emptyCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 No applications yet. Start a service to see it here.
               </Text>
@@ -233,70 +207,27 @@ export default function HomeScreen() {
                 key={app.id}
                 activeOpacity={0.8}
                 onPress={() => {
-                  useApplicationStore
-                    .getState()
-                    .setSelectedApplicationId(app.id);
+                  useApplicationStore.getState().setSelectedApplicationId(app.id);
                   router.push(`/application/${app.id}`);
                 }}
                 style={[
-                  styles.appItemCard,
+                  styles.recentAppItem,
                   {
                     backgroundColor: colors.backgroundElement,
                     borderColor: colors.border,
                   },
                 ]}
               >
-                <View style={styles.appCardHeader}>
-                  <Text style={[styles.appName, { color: colors.text }]}>
-                    {app.serviceName}
-                  </Text>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      {
-                        backgroundColor:
-                          app.status === "Completed"
-                            ? "#E8F5E9"
-                            : colors.orangeLight,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.statusText,
-                        {
-                          color:
-                            app.status === "Completed"
-                              ? colors.success
-                              : colors.orange,
-                        },
-                      ]}
-                    >
-                      {app.status}
-                    </Text>
+                <View style={styles.recentItemLeft}>
+                  <View style={[styles.recentIconBg, { backgroundColor: colors.orangeLight }]}>
+                    <Ionicons name="document-text" size={20} color={colors.orange} />
+                  </View>
+                  <View style={styles.recentItemInfo}>
+                    <Text style={[styles.recentAppName, { color: colors.text }]}>{app.serviceName}</Text>
+                    <Text style={[styles.recentAppStatus, { color: colors.textSecondary }]}>{app.status} • {app.id}</Text>
                   </View>
                 </View>
-
-                <Text style={[styles.appId, { color: colors.textSecondary }]}>
-                  {app.id}
-                </Text>
-
-                <View style={styles.progressContainer}>
-                  <View style={styles.progressBarWrapper}>
-                    <View
-                      style={[
-                        styles.progressBar,
-                        {
-                          width: `${app.progress}%`,
-                          backgroundColor: colors.primary,
-                        },
-                      ]}
-                    />
-                  </View>
-                  <Text style={[styles.progressVal, { color: colors.text }]}>
-                    {app.progress}%
-                  </Text>
-                </View>
+                <Text style={[styles.recentAppTime, { color: colors.textSecondary }]}>2 Days ago</Text>
               </TouchableOpacity>
             ))
           )}
@@ -310,109 +241,201 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
+  heroHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
-  welcomeSection: {
-    marginBottom: 20,
-  },
-  welcomeText: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  welcomeSubText: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  statsGrid: {
+  topHeaderRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: "45%",
-    borderRadius: 14,
-    borderWidth: 1.5,
-    padding: 14,
-  },
-  statIconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
   },
-  statValue: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 2,
-    fontWeight: "500",
-  },
-  reminderCard: {
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
-  },
-  reminderHeader: {
+  brandContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  reminderTitle: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 11,
-    letterSpacing: 0.8,
+  logo: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
   },
-  reminderText: {
+  brandText: {
     color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+  },
+  headerIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconBtn: {
+    padding: 4,
+  },
+  greetingContainer: {
+    marginTop: 20,
+  },
+  welcomeText: {
+    color: "#FFFFFF",
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  welcomeSubText: {
+    color: "#E2E8F0",
     fontSize: 14,
-    marginTop: 8,
-    lineHeight: 20,
+    marginTop: 4,
     fontWeight: "500",
   },
-  reminderFooter: {
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
+    gap: 16,
+  },
+  loansBanner: {
+    borderRadius: 16,
+    padding: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  bannerLeft: {
+    flex: 1.2,
+  },
+  bannerTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  bannerDesc: {
+    color: "#E2E8F0",
+    fontSize: 13,
+    marginTop: 4,
+    fontWeight: "600",
+  },
+  exploreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 16,
+    height: 32,
+    borderRadius: 16,
+    alignSelf: "flex-start",
     marginTop: 14,
   },
-  reminderDays: {
-    color: "#FFEAA7",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  reminderBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  reminderBtnText: {
+  exploreText: {
     color: "#FFFFFF",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: 12,
+  },
+  bannerRight: {
+    flex: 0.8,
+    alignItems: "flex-end",
+  },
+  quickLinksGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
+  quickLinkItem: {
+    width: (width - 64) / 4,
+    alignItems: "center",
+  },
+  circleIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  circleLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textAlign: "center",
+    marginTop: 8,
+    lineHeight: 14,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  statsCard: {
+    flex: 1,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    padding: 16,
+    alignItems: "center",
+  },
+  statsNumber: {
+    fontSize: 26,
+    fontWeight: "800",
+  },
+  statsLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    textAlign: "center",
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  complianceCard: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  complianceLeft: {
+    flex: 1,
+  },
+  complianceTitle: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  complianceDesc: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  complianceBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  complianceBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
     marginTop: 8,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 13,
+    fontWeight: "800",
+    letterSpacing: 0.8,
   },
   seeAllText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: "700",
   },
   recentList: {
     gap: 12,
@@ -427,56 +450,42 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
   },
-  appItemCard: {
-    borderRadius: 12,
+  recentAppItem: {
+    borderRadius: 14,
     borderWidth: 1.5,
-    padding: 16,
-  },
-  appCardHeader: {
+    padding: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  appName: {
-    fontSize: 15,
-    fontWeight: "700",
-    flex: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  appId: {
-    fontSize: 12,
-    marginTop: 2,
-    fontWeight: "500",
-  },
-  progressContainer: {
+  recentItemLeft: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
-    gap: 10,
-  },
-  progressBarWrapper: {
     flex: 1,
-    height: 6,
-    backgroundColor: "#00000008",
-    borderRadius: 3,
-    overflow: "hidden",
+    marginRight: 12,
   },
-  progressBar: {
-    height: "100%",
-    borderRadius: 3,
+  recentIconBg: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  progressVal: {
-    fontSize: 12,
+  recentItemInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  recentAppName: {
+    fontSize: 14,
     fontWeight: "700",
-    width: 32,
-    textAlign: "right",
+  },
+  recentAppStatus: {
+    fontSize: 11,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  recentAppTime: {
+    fontSize: 11,
+    fontWeight: "500",
   },
 });

@@ -1,17 +1,10 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useTheme } from "../hooks/use-theme";
-import { CATEGORIES } from "../data/services";
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, FlatList, TouchableOpacity } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTheme } from '../hooks/use-theme';
+import { CATEGORIES } from '../data/services';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
 
 export function ServiceCarousel({ onExplore }) {
@@ -21,61 +14,41 @@ export function ServiceCarousel({ onExplore }) {
 
   const getSubServices = (catId) => {
     switch (catId) {
-      case "GST":
-        return [
-          "• GST Registration",
-          "• GST Filing",
-          "• GST Compliance & Returns",
-        ];
-      case "ITR":
-        return [
-          "• ITR Filing (Salary/Business)",
-          "• TDS Refund Claims",
-          "• Revised Returns & Notices",
-        ];
-      case "LOANS":
-        return [
-          "• Business & MSME Loans",
-          "• Personal & Home Loans",
-          "• Working Capital / Machinery",
-        ];
-      case "INSURANCE":
-        return [
-          "• Health & Life Insurance",
-          "• Motor & Vehicle Cover",
-          "• Business & Commercial Policy",
-        ];
-      case "BUSINESS":
-        return [
-          "• Company & LLP Registration",
-          "• Accounting & Bookkeeping",
-          "• ROC Compliance & Payroll",
-        ];
+      case 'GST':
+        return ['Registration', 'Filing', 'Compliance', 'Amendment', 'Certificate'];
+      case 'ITR':
+        return ['ITR Filing', 'TDS Refund', 'Previous Year ITR', 'Revised ITR', 'Tax Notice Assistance'];
+      case 'LOANS':
+        return ['Business Loan', 'Personal Loan', 'Home Loan', 'Property Loan', 'Vehicle Loan'];
+      case 'INSURANCE':
+        return ['Health Insurance', 'Life Insurance', 'Motor Insurance', 'Home Insurance', 'Business Insurance'];
+      case 'BUSINESS':
+        return ['Business Registration', 'Company / LLP Incorporation', 'Udyam / MSME Registration', 'ROC Compliance', 'Accounting & Bookkeeping'];
       default:
         return [];
     }
   };
 
-  const getShortDesc = (catId) => {
+  const getSubTitleText = (catId) => {
     switch (catId) {
-      case "GST":
-        return "Complete tax compliance for businesses";
-      case "ITR":
-        return "Tax filing made easy & maximum refunds";
-      case "LOANS":
-        return "Fulfill capital requirements with ease";
-      case "INSURANCE":
-        return "Complete coverage for health and assets";
-      case "BUSINESS":
-        return "End-to-end setup and bookkeeping support";
+      case 'GST':
+        return 'GST Registration & Filing Services';
+      case 'ITR':
+        return 'Income Tax Services';
+      case 'LOANS':
+        return 'Personal & Business Loans';
+      case 'INSURANCE':
+        return 'Personal & Commercial';
+      case 'BUSINESS':
+        return 'Business & Compliance';
       default:
-        return "";
+        return '';
     }
   };
 
   const handleScroll = (event) => {
     const scrollOffset = event.nativeEvent.contentOffset.x;
-    const index = Math.round(scrollOffset / (width - 24)); // adjusting for container margin
+    const index = Math.round(scrollOffset / (width - 24));
     setActiveIndex(index);
   };
 
@@ -94,58 +67,36 @@ export function ServiceCarousel({ onExplore }) {
         contentContainerStyle={styles.listContent}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={styles.header}>
-              <View
-                style={[styles.iconBg, { backgroundColor: colors.orangeLight }]}
-              >
-                <Ionicons name={item.icon} size={28} color={colors.orange} />
+          <View style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+            {/* Dark Blue Header Section of Carousel Card */}
+            <View style={[styles.cardHeader, { backgroundColor: colors.primary }]}>
+              <View style={styles.iconBg}>
+                <Ionicons name={item.icon} size={28} color={colors.primary} />
               </View>
-              <View style={styles.headerText}>
-                <Text style={[styles.title, { color: colors.text }]}>
-                  {item.name}
-                </Text>
-                <Text
-                  style={[styles.subtitle, { color: colors.textSecondary }]}
-                >
-                  {getShortDesc(item.id)}
-                </Text>
-              </View>
+              <Text style={styles.cardTitle}>{item.id}</Text>
+              <Text style={styles.cardSubTitle}>{getSubTitleText(item.id)}</Text>
             </View>
 
-            <View style={styles.divider} />
-
+            {/* Body Checklist Section */}
             <View style={styles.body}>
-              <Text
-                style={[styles.sectionTitle, { color: colors.textSecondary }]}
-              >
-                MAJOR SERVICES
-              </Text>
               {getSubServices(item.id).map((service, idx) => (
-                <Text
-                  key={idx}
-                  style={[styles.bulletItem, { color: colors.text }]}
-                >
-                  {service}
-                </Text>
+                <View key={idx} style={styles.checkRow}>
+                  <Ionicons name="checkmark" size={16} color={colors.primary} />
+                  <Text style={[styles.bulletItem, { color: colors.text }]}>
+                    {service}
+                  </Text>
+                </View>
               ))}
             </View>
 
+            {/* Explore Button */}
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => onExplore(item.id)}
               style={[styles.exploreBtn, { backgroundColor: colors.primary }]}
             >
-              <Text style={styles.exploreText}>Explore Category</Text>
-              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+              <Text style={styles.exploreText}>Explore</Text>
+              <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         )}
@@ -159,8 +110,7 @@ export function ServiceCarousel({ onExplore }) {
             style={[
               styles.indicatorDot,
               {
-                backgroundColor:
-                  activeIndex === index ? colors.orange : colors.border,
+                backgroundColor: activeIndex === index ? colors.orange : colors.border,
                 width: activeIndex === index ? 16 : 8,
               },
             ]}
@@ -173,7 +123,7 @@ export function ServiceCarousel({ onExplore }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
+    marginVertical: 4,
   },
   listContent: {
     paddingHorizontal: 12,
@@ -181,70 +131,73 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     marginHorizontal: 8,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1.5,
-    padding: 20,
-    justifyContent: "space-between",
+    overflow: 'hidden',
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
+  cardHeader: {
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: 'center',
   },
   iconBg: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  headerText: {
-    marginLeft: 14,
-    flex: 1,
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: 1.5,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  subtitle: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#E2E8F0",
-    marginVertical: 14,
+  cardSubTitle: {
+    color: '#E2E8F0',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
   body: {
-    marginBottom: 16,
+    padding: 20,
+    gap: 8,
   },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    marginBottom: 8,
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   bulletItem: {
     fontSize: 14,
-    fontWeight: "500",
-    marginVertical: 4,
+    fontWeight: '600',
   },
   exploreBtn: {
-    height: 46,
+    height: 44,
     borderRadius: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     gap: 6,
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   exploreText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+    color: '#FFFFFF',
+    fontWeight: '700',
     fontSize: 14,
   },
   indicatorContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 14,
     gap: 6,
   },
