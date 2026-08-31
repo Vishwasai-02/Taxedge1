@@ -10,6 +10,7 @@ import {
   Modal,
   Pressable,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -20,6 +21,7 @@ import { useApplicationStore } from "../../store/applicationStore";
 import { useNotificationStore } from "../../store/notificationStore";
 import { ServiceCarousel } from "../../components/ServiceCarousel";
 import { SavingsJarAnimation } from "../../components/SavingsJarAnimation";
+import { SERVICE_CATALOGUE } from "../../data/catalogue";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Maybe } from "../../utils/functional";
 
@@ -27,9 +29,6 @@ const { width } = Dimensions.get("window");
 
 const H_PADDING = 16;
 const CARD_WIDTH = width - H_PADDING * 2;
-const TILES_PER_PAGE = 5;
-const TILE_WIDTH = (CARD_WIDTH - 20) / TILES_PER_PAGE;
-const GRID_TILE_WIDTH = (width - 72) / 4;
 
 /* Full service catalogue. The first five are the primary row; the rest fill the
    swipeable pages and the "All Services" sheet. Every route resolves to a real screen. */
@@ -55,6 +54,39 @@ const SERVICE_TILES = [
   { id: "my-filings", label: "My Filings", icon: "folder-open", tint: "#0284C7", tintBg: "#E6F2FA", route: "/(main)/applications" },
 ];
 
+const UPCOMING_DEADLINES = [
+  {
+    id: "gstr3b",
+    tag: "GST",
+    tint: "#0F766E",
+    tintBg: "#E6F5F2",
+    title: "GSTR-3B Filing Due",
+    date: "20 Sep 2026",
+    urgent: true,
+    route: "/service/gst-filing",
+  },
+  {
+    id: "itr1",
+    tag: "ITR",
+    tint: "#2563EB",
+    tintBg: "#EAF1FE",
+    title: "ITR-1 Filing Deadline",
+    date: "31 Oct 2026",
+    urgent: false,
+    route: "/service/itr-filing",
+  },
+  {
+    id: "emi",
+    tag: "Loan",
+    tint: "#EA580C",
+    tintBg: "#FEF0E6",
+    title: "EMI Due - Business Loan",
+    date: "05 Sep 2026",
+    urgent: false,
+    route: "/service/business-loan",
+  },
+];
+
 const MORE_TILE = {
   id: "more",
   label: "More Services",
@@ -66,7 +98,12 @@ const MORE_TILE = {
 
 /* The home row is fixed: GST / ITR / TDS / Loans and the More entry, which opens
    the full catalogue in a sheet. Nothing scrolls here. */
-const HOME_TILES = [...SERVICE_TILES.slice(0, 4), MORE_TILE];
+const HOME_TILES = [
+  SERVICE_TILES[0], // GST
+  SERVICE_TILES[1], // ITR
+  SERVICE_TILES[3], // Loans
+  { ...MORE_TILE, label: "More" },
+];
 
 /* Swipeable "apply for" banners. id matches a category in data/services.js. */
 const APPLY_BANNERS = [
@@ -124,7 +161,26 @@ export default function HomeScreen() {
     (sum, app) => sum + app.documents.filter((d) => d.status === "Pending").length,
     0
   );
+  const completedCount = applications.filter((app) => app.status === "Completed").length;
+  const paymentDue = applications
+    .filter((app) => app.paymentStatus === "Pending")
+    .reduce((sum, app) => sum + (app.paymentAmount || 0), 0);
+
   const recentApps = applications.slice(0, 3);
+
+  const STATS = [
+    { id: "active", label: "Active\nApplications", value: `${activeCount}`, tint: "#059669", tintBg: "#E6F5F0", icon: "folder", route: "/(main)/applications" },
+    { id: "docs", label: "Pending\nDocuments", value: `${pendingDocsCount}`, tint: "#EA580C", tintBg: "#FEF0E6", icon: "document-attach", route: "/(main)/applications" },
+    { id: "due", label: "Payment Due", value: `₹${paymentDue.toLocaleString("en-IN")}`, tint: "#DC2626", tintBg: "#FDEBEB", icon: "card", route: "/(main)/payments" },
+    { id: "done", label: "Completed\nServices", value: `${completedCount}`, tint: "#2563EB", tintBg: "#EAF1FE", icon: "checkbox", route: "/(main)/applications" },
+  ];
+
+  const statusTone = (status) => {
+    if (status === "Completed") return { fg: "#047857", bg: "#E6F5F0" };
+    if (status === "Rejected") return { fg: "#B91C1C", bg: "#FDEBEB" };
+    if (status === "Verification") return { fg: "#6D28D9", bg: "#F1ECFE" };
+    return { fg: "#1D4ED8", bg: "#EAF1FE" };
+  };
 
   const tileBg = (item) => (isDark ? colors.backgroundSelected : item.tintBg);
   const tileFg = (item) => (isDark ? colors.text : item.tint);
@@ -139,6 +195,30 @@ export default function HomeScreen() {
   const go = (route) => {
     setMenuOpen(false);
     router.push(route);
+  };
+
+  /* Support chat needs a real application to attach to; otherwise show contact details. */
+  const handleNeedHelp = () => {
+    const latest = applications[0];
+    if (latest) {
+      useApplicationStore.getState().setSelectedApplicationId(latest.id);
+      router.push(`/chat/${latest.id}`);
+      return;
+    }
+    Alert.alert(
+      "Need Help?",
+      "Our experts are available 24/7.\n\nEmail: support@taxedge.com\nToll free: 1800-TAX-EDGE",
+      [{ text: "OK" }],
+    );
+  };
+
+  const openCatalogueItem = (item, categoryId) => {
+    setMoreOpen(false);
+    if (item.serviceId) {
+      router.push(`/service/${item.serviceId}`);
+    } else {
+      handleExploreCategory(categoryId);
+    }
   };
 
   const openTile = (tile) => {
@@ -273,7 +353,28 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
             ))}
-          </ScrollView>
+    
+        {/* ---------- Need help ---------- */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={handleNeedHelp}
+          style={styles.helpCard}
+        >
+          <View style={styles.helpIcon}>
+            <Ionicons name="chatbubble-ellipses" size={22} color="#FFFFFF" />
+          </View>
+
+          <View style={styles.helpText}>
+            <Text style={styles.helpTitle}>Need Help?</Text>
+            <Text style={styles.helpDesc}>Our experts are available 24/7</Text>
+          </View>
+
+          <View style={styles.helpBtn}>
+            <Text style={styles.helpBtnText}>Chat</Text>
+          </View>
+        </TouchableOpacity>
+
+      </ScrollView>
 
           <View style={styles.dotsRow}>
             {APPLY_BANNERS.map((b, i) => (
@@ -295,6 +396,10 @@ export default function HomeScreen() {
         {/* ---------- Quick Services ---------- */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Services</Text>
+          <TouchableOpacity onPress={() => setMoreOpen(true)} hitSlop={8} style={styles.linkRow}>
+            <Text style={[styles.viewAllText, { color: colors.primary }]}>All Services</Text>
+            <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.card, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
@@ -383,33 +488,70 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* ---------- Stats ---------- */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statsCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-            <Text style={[styles.statsNumber, { color: colors.primary }]}>
-              {activeCount < 10 ? `0${activeCount}` : activeCount}
-            </Text>
-            <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Active Applications</Text>
-          </View>
-          <View style={[styles.statsCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-            <Text style={[styles.statsNumber, { color: colors.orange }]}>
-              {pendingDocsCount < 10 ? `0${pendingDocsCount}` : pendingDocsCount}
-            </Text>
-            <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>Pending Documents</Text>
-          </View>
+        {/* ---------- Stats grid ---------- */}
+        <View style={styles.statsGrid}>
+          {STATS.map((stat) => (
+            <TouchableOpacity
+              key={stat.id}
+              activeOpacity={0.85}
+              onPress={() => router.push(stat.route)}
+              style={[
+                styles.statsCard,
+                { backgroundColor: colors.backgroundElement, borderColor: colors.border },
+              ]}
+            >
+              <View style={styles.statsTop}>
+                <Text style={[styles.statsLabel, { color: colors.textSecondary }]}>
+                  {stat.label}
+                </Text>
+                <View style={[styles.statsIcon, { backgroundColor: isDark ? colors.backgroundSelected : stat.tintBg }]}>
+                  <Ionicons name={stat.icon} size={17} color={isDark ? colors.text : stat.tint} />
+                </View>
+              </View>
+              <Text style={[styles.statsNumber, { color: stat.tint }]}>{stat.value}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* ---------- Compliance ---------- */}
-        <View style={[styles.card, styles.complianceCard, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          <View style={styles.complianceLeft}>
-            <Text style={[styles.complianceTitle, { color: colors.textSecondary }]}>Upcoming Compliance</Text>
-            <Text style={[styles.complianceDesc, { color: colors.text }]}>
-              GSTR-3B <Text style={{ color: colors.error, fontWeight: "600" }}>Due in 5 Days</Text>
-            </Text>
-          </View>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/service/gst-filing")}>
-            <Text style={[styles.complianceBtnText, { color: colors.primary }]}>File Now →</Text>
-          </TouchableOpacity>
+        {/* ---------- Upcoming deadlines ---------- */}
+        <View style={[styles.card, styles.cardPadded, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Upcoming Deadlines</Text>
+
+          {UPCOMING_DEADLINES.map((item, index) => (
+            <TouchableOpacity
+              key={item.id}
+              activeOpacity={0.75}
+              onPress={() => router.push(item.route)}
+              style={[
+                styles.deadlineRow,
+                index < UPCOMING_DEADLINES.length - 1 && {
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  borderBottomColor: colors.border,
+                },
+              ]}
+            >
+              <View style={[styles.deadlineTag, { backgroundColor: isDark ? colors.backgroundSelected : item.tintBg }]}>
+                <Text style={[styles.deadlineTagText, { color: isDark ? colors.text : item.tint }]}>
+                  {item.tag}
+                </Text>
+              </View>
+
+              <View style={styles.deadlineText}>
+                <Text style={[styles.deadlineTitle, { color: colors.text }]} numberOfLines={1}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.deadlineDate, { color: colors.textSecondary }]}>
+                  {item.date}
+                </Text>
+              </View>
+
+              {item.urgent && (
+                <View style={[styles.duePill, { backgroundColor: isDark ? colors.backgroundSelected : "#FDEBEB" }]}>
+                  <Text style={[styles.duePillText, { color: colors.error }]}>Due Soon</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* ---------- Core categories ---------- */}
@@ -424,52 +566,64 @@ export default function HomeScreen() {
         {/* ---------- Recent applications ---------- */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Applications</Text>
-          <TouchableOpacity onPress={() => router.push("/(main)/applications")} hitSlop={8}>
+          <TouchableOpacity onPress={() => router.push("/(main)/applications")} hitSlop={8} style={styles.linkRow}>
             <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
+            <Ionicons name="chevron-forward" size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.card, styles.cardPadded, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-          {recentApps.length === 0 ? (
+        {recentApps.length === 0 ? (
+          <View style={[styles.card, styles.cardPadded, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               No applications yet. Start a service to see it here.
             </Text>
-          ) : (
-            recentApps.map((app, index) => (
+          </View>
+        ) : (
+          recentApps.map((app) => {
+            const tone = statusTone(app.status);
+            return (
               <TouchableOpacity
                 key={app.id}
-                activeOpacity={0.75}
+                activeOpacity={0.85}
                 onPress={() => {
                   useApplicationStore.getState().setSelectedApplicationId(app.id);
                   router.push(`/application/${app.id}`);
                 }}
                 style={[
-                  styles.listRow,
-                  index < recentApps.length - 1 && {
-                    borderBottomWidth: StyleSheet.hairlineWidth,
-                    borderBottomColor: colors.border,
-                  },
+                  styles.appCard,
+                  { backgroundColor: colors.backgroundElement, borderColor: colors.border },
                 ]}
               >
-                <View style={[styles.listIconCircle, { backgroundColor: colors.orangeLight }]}>
-                  <Ionicons name="document-text" size={20} color={colors.orange} />
+                <View style={styles.appCardTop}>
+                  <Text style={[styles.appId, { color: colors.success }]}>{app.id}</Text>
+                  <View style={[styles.statusPill, { backgroundColor: isDark ? colors.backgroundSelected : tone.bg }]}>
+                    <Text style={[styles.statusPillText, { color: isDark ? colors.text : tone.fg }]}>
+                      {app.status}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.listRowText}>
-                  <Text style={[styles.listRowTitle, { color: colors.text }]} numberOfLines={1}>
-                    {app.serviceName}
+
+                <Text style={[styles.appName, { color: colors.text }]} numberOfLines={1}>
+                  {app.serviceName}
+                </Text>
+
+                <View style={styles.appCardBottom}>
+                  <Text style={[styles.appDate, { color: colors.textSecondary }]}>
+                    {app.createdAt}
                   </Text>
-                  <Text style={[styles.listRowDesc, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {app.status} • {app.id}
-                  </Text>
+                  <View style={styles.linkRow}>
+                    <Text style={[styles.viewAllText, { color: colors.primary }]}>View Details</Text>
+                    <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+                  </View>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
               </TouchableOpacity>
-            ))
-          )}
-        </View>
+            );
+          })
+        )}
+
       </ScrollView>
 
-      {/* ---------- All services sheet ---------- */}
+      {/* ---------- Explore services sheet ---------- */}
       <Modal
         visible={moreOpen}
         transparent
@@ -480,40 +634,77 @@ export default function HomeScreen() {
           <Pressable
             style={[
               styles.sheet,
-              { backgroundColor: colors.backgroundElement, paddingBottom: insets.bottom + 20 },
+              { backgroundColor: colors.backgroundElement, paddingBottom: insets.bottom + 12 },
             ]}
             onPress={(e) => e.stopPropagation()}
           >
             <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
 
             <View style={styles.sheetHeader}>
-              <Text style={[styles.sheetTitle, { color: colors.text }]}>All Services</Text>
+              <View>
+                <Text style={[styles.sheetTitle, { color: colors.text }]}>Explore Services</Text>
+                <Text style={[styles.sheetSubtitle, { color: colors.textSecondary }]}>
+                  Everything TaxEdge can file, fund and cover
+                </Text>
+              </View>
               <TouchableOpacity onPress={() => setMoreOpen(false)} hitSlop={10}>
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <View style={styles.sheetGrid}>
-                {SERVICE_TILES.map((tile) => (
-                  <TouchableOpacity
-                    key={tile.id}
-                    activeOpacity={0.75}
-                    onPress={() => openTile(tile)}
-                    style={styles.gridTile}
-                  >
-                    <View style={[styles.circleIcon, { backgroundColor: tileBg(tile) }]}>
-                      <Ionicons name={tile.icon} size={24} color={tileFg(tile)} />
-                    </View>
-                    <Text
-                      style={[styles.circleLabel, { color: colors.text }]}
-                      numberOfLines={2}
+              {SERVICE_CATALOGUE.map((group, groupIndex) => (
+                <View
+                  key={`${group.id}-${groupIndex}`}
+                  style={[
+                    styles.catGroup,
+                    { backgroundColor: colors.background, borderColor: colors.border },
+                  ]}
+                >
+                  <View style={styles.catHeader}>
+                    <View
+                      style={[
+                        styles.catIcon,
+                        { backgroundColor: isDark ? colors.backgroundSelected : group.tintBg },
+                      ]}
                     >
-                      {tile.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                      <Ionicons
+                        name={group.icon}
+                        size={20}
+                        color={isDark ? colors.text : group.tint}
+                      />
+                    </View>
+                    <View style={styles.catHeaderText}>
+                      <Text style={[styles.catTitle, { color: colors.text }]}>{group.title}</Text>
+                      <Text style={[styles.catCount, { color: colors.textSecondary }]}>
+                        {group.items.length} services
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.chipWrap}>
+                    {group.items.map((item) => (
+                      <TouchableOpacity
+                        key={item.label}
+                        activeOpacity={0.75}
+                        onPress={() => openCatalogueItem(item, group.id)}
+                        style={[
+                          styles.chip,
+                          { backgroundColor: colors.backgroundElement, borderColor: colors.border },
+                        ]}
+                      >
+                        <View
+                          style={[
+                            styles.chipDot,
+                            { backgroundColor: isDark ? colors.textSecondary : group.tint },
+                          ]}
+                        />
+                        <Text style={[styles.chipText, { color: colors.text }]}>{item.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              ))}
 
               <TouchableOpacity
                 activeOpacity={0.85}
@@ -818,7 +1009,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   quickTile: {
-    width: TILE_WIDTH,
+    flex: 1,
     alignItems: "center",
     paddingHorizontal: 1,
   },
@@ -844,7 +1035,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sheet: {
-    maxHeight: "78%",
+    maxHeight: "88%",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -859,22 +1050,75 @@ const styles = StyleSheet.create({
   },
   sheetHeader: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 18,
   },
   sheetTitle: {
     fontSize: 18,
     fontWeight: "800",
   },
-  sheetGrid: {
+  sheetSubtitle: {
+    fontSize: 12.5,
+    fontWeight: "500",
+    marginTop: 3,
+  },
+
+  /* Catalogue groups */
+  catGroup: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 14,
+  },
+  catHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+  },
+  catIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  catHeaderText: {
+    flex: 1,
+  },
+  catTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  catCount: {
+    fontSize: 11.5,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  chipWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
-    rowGap: 20,
+    gap: 8,
   },
-  gridTile: {
-    width: GRID_TILE_WIDTH,
+  chip: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 7,
+    paddingLeft: 10,
+    paddingRight: 13,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+  },
+  chipDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  chipText: {
+    fontSize: 12.5,
+    fontWeight: "600",
   },
   sheetCta: {
     flexDirection: "row",
@@ -985,52 +1229,131 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
 
-  /* Stats */
-  statsRow: {
+  /* Stats grid */
+  statsGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   statsCard: {
-    flex: 1,
+    width: (CARD_WIDTH - 12) / 2,
     borderRadius: 16,
     borderWidth: 1,
-    padding: 16,
+    padding: 14,
+  },
+  statsTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  statsLabel: {
+    flex: 1,
+    fontSize: 12.5,
+    fontWeight: "600",
+    lineHeight: 16,
+  },
+  statsIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    justifyContent: "center",
     alignItems: "center",
   },
   statsNumber: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800",
-  },
-  statsLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    marginTop: 4,
-    textAlign: "center",
+    marginTop: 12,
   },
 
-  /* Compliance */
-  complianceCard: {
+  /* Upcoming deadlines */
+  deadlineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 13,
+  },
+  deadlineTag: {
+    minWidth: 44,
+    paddingHorizontal: 8,
+    height: 26,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deadlineTagText: {
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  deadlineText: {
+    flex: 1,
+  },
+  deadlineTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  deadlineDate: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 3,
+  },
+  duePill: {
+    paddingHorizontal: 10,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+  },
+  duePillText: {
+    fontSize: 11,
+    fontWeight: "800",
+  },
+
+  /* Recent application cards */
+  appCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+  },
+  appCardTop: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    gap: 10,
   },
-  complianceLeft: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  complianceTitle: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  complianceDesc: {
-    fontSize: 14.5,
+  appId: {
+    fontSize: 12.5,
     fontWeight: "700",
-    marginTop: 4,
+    letterSpacing: 0.3,
   },
-  complianceBtnText: {
-    fontSize: 13,
+  statusPill: {
+    paddingHorizontal: 10,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+  },
+  statusPillText: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  appName: {
+    fontSize: 17,
     fontWeight: "800",
+    marginTop: 10,
+  },
+  appCardBottom: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 14,
+  },
+  appDate: {
+    fontSize: 12.5,
+    fontWeight: "500",
+  },
+  linkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
   },
 
   /* Section headers */
@@ -1042,6 +1365,58 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
+    fontWeight: "800",
+  },
+
+  /* Need help */
+  helpCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: "#0B5B41",
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  helpIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.16)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  helpText: {
+    flex: 1,
+  },
+  helpTitle: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  helpDesc: {
+    color: "#C7E5D8",
+    fontSize: 12.5,
+    fontWeight: "500",
+    marginTop: 3,
+  },
+  helpBtn: {
+    paddingHorizontal: 18,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+    justifyContent: "center",
+  },
+  helpBtnText: {
+    color: "#FFFFFF",
+    fontSize: 13.5,
     fontWeight: "800",
   },
 
