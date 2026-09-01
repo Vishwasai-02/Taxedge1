@@ -185,6 +185,7 @@ export default function LoginScreen() {
               title="Continue"
               onPress={handleContinue}
               loading={loading}
+              colorType="orange"
               style={styles.continueBtn}
             />
 

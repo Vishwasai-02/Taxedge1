@@ -286,6 +286,7 @@ export default function OTPScreen() {
               title="Create Profile"
               onPress={handleCreateProfile}
               loading={profileLoading}
+              colorType="orange"
               style={styles.submitBtn}
             />
           </View>
@@ -369,6 +370,7 @@ export default function OTPScreen() {
             title="Verify Code"
             onPress={handleVerifyOtp}
             loading={loading}
+            colorType="orange"
             style={styles.verifyBtn}
           />
 
