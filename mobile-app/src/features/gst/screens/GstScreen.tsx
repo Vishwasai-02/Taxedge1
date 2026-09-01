@@ -3,7 +3,6 @@ import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { ServiceHeader } from "../../../shared/components/ServiceHeader";
 import { ServiceList } from "../../../shared/components/ServiceList";
-import { BrandColors } from "../../../shared/theme";
 import { gstService } from "../services/GstService";
 import { GstServiceItem } from "../types/gst.types";
 
@@ -25,9 +24,9 @@ export const GstScreen: React.FC = () => {
     <View style={styles.container}>
       <ServiceHeader
         title="GST Services"
-        subtitle="Manage all your GST related services easily in one place."
-        tag="Tax & Compliance"
-        iconName="document-text"
+        subtitle="Complete your GST requirements with expert CA assistance and guaranteed compliance."
+        tag="Financial Services"
+        iconName="document-text-outline"
       />
       <ServiceList items={services} onItemPress={handleCardPress} />
     </View>
@@ -37,8 +36,9 @@ export const GstScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BrandColors.BACKGROUND,
+    backgroundColor: "#F8FAFC",
   },
 });
 
 export default GstScreen;
+
