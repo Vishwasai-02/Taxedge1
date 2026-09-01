@@ -29,7 +29,7 @@ import Svg, {
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
 import { useApplicationStore } from "../../store/applicationStore";
-import { SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
+import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import { SecondaryButton } from "../../components/SecondaryButton";
 import type { IconName } from "../../types/domain";
 
@@ -40,7 +40,7 @@ import type { IconName } from "../../types/domain";
  */
 
 type RowAction =
-  | { kind: "route"; href: Href }
+  | { kind: "route"; href: any }
   | { kind: "modal"; modal: "personal" | "kyc" }
   | { kind: "soon" };
 
