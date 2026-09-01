@@ -17,7 +17,7 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
 import { PrimaryButton } from "../../components/PrimaryButton";
-
+ 
 function GoogleIcon({ size = 20 }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -40,18 +40,18 @@ function GoogleIcon({ size = 20 }) {
     </Svg>
   );
 }
-
+ 
 export default function LoginScreen() {
   const colors = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const setMobileNumber = useAuthStore((state) => state.setMobileNumber);
-
+ 
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-
+ 
   const handleContinue = () => {
     if (mobile.length !== 10 || !/^\d+$/.test(mobile)) {
       setError("Please enter a valid 10-digit mobile number");
@@ -59,28 +59,28 @@ export default function LoginScreen() {
     }
     setError("");
     setLoading(true);
-
+ 
     setTimeout(() => {
       setLoading(false);
       setMobileNumber(mobile);
       router.push("/(auth)/otp");
     }, 800);
   };
-
+ 
   const handleGoogleSignIn = () => {
     Alert.alert(
       "Google Sign-In",
       "Google authentication will be available soon."
     );
   };
-
+ 
   const handleCreateAccount = () => {
     if (mobile.length === 10) {
       setMobileNumber(mobile);
     }
     router.push("/(auth)/register");
   };
-
+ 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -114,23 +114,23 @@ export default function LoginScreen() {
               FIN SOLUTIONS
             </Text>
           </View>
-
+ 
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={[styles.welcomeTitle, { color: colors.text }]}>
-              Welcome Back 
+              Welcome Back 👋
             </Text>
             <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
               Login to continue with TaxEdge
             </Text>
           </View>
-
+ 
           {/* Form Section */}
           <View style={styles.formSection}>
             <Text style={[styles.inputLabel, { color: colors.text }]}>
               Mobile Number
             </Text>
-
+ 
             {/* +91 & Mobile Number Input */}
             <View style={styles.phoneInputRow}>
               <View
@@ -146,7 +146,7 @@ export default function LoginScreen() {
                   +91
                 </Text>
               </View>
-
+ 
               <TextInput
                 value={mobile}
                 onChangeText={(text) => {
@@ -173,21 +173,22 @@ export default function LoginScreen() {
                 ]}
               />
             </View>
-
+ 
             {error ? (
               <Text style={[styles.errorText, { color: colors.error }]}>
                 {error}
               </Text>
             ) : null}
-
+ 
             {/* Continue Button */}
             <PrimaryButton
               title="Continue"
               onPress={handleContinue}
               loading={loading}
+              colorType="orange"
               style={styles.continueBtn}
             />
-
+ 
             {/* Or Divider */}
             <View style={styles.dividerRow}>
               <View
@@ -202,7 +203,7 @@ export default function LoginScreen() {
                 style={[styles.dividerLine, { backgroundColor: colors.border }]}
               />
             </View>
-
+ 
             {/* Continue with Google */}
             <TouchableOpacity
               activeOpacity={0.8}
@@ -220,7 +221,7 @@ export default function LoginScreen() {
                 Continue with Google
               </Text>
             </TouchableOpacity>
-
+ 
             {/* Create Account Single Line */}
             <View style={styles.createAccountRow}>
               <Text style={[styles.newToText, { color: colors.textSecondary }]}>
@@ -238,14 +239,14 @@ export default function LoginScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-
+ 
           </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -390,5 +391,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
   },
-
+ 
 });
