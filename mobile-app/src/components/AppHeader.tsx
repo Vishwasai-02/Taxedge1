@@ -47,7 +47,7 @@ export function AppHeader({
             </TouchableOpacity>
           ) : (
             <Image
-              source={require("../../assets/images/logo.png")}
+              source={require("../../assets/images/icon.png")}
               style={styles.miniLogo}
               resizeMode="contain"
             />

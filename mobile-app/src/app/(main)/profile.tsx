@@ -9,27 +9,18 @@ import {
   Modal,
   Image,
   ActivityIndicator,
-  StatusBar,
   type AlertButton,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter, type Href } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, {
-  Circle,
-  Defs,
-  Ellipse,
-  Path,
-  Text as SvgText,
-  TextPath,
-} from "react-native-svg";
 
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
 import { useApplicationStore } from "../../store/applicationStore";
+
 import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
+ 
 import { SecondaryButton } from "../../components/SecondaryButton";
 import type { IconName } from "../../types/domain";
 
@@ -199,13 +190,6 @@ const SECTIONS: MenuSection[] = [
   },
 ];
 
-/** The three shortcuts under the name. No screens behind them yet. */
-const QUICK_ACTIONS: { label: string; icon: IconName }[] = [
-  { label: "Manage\nProfile", icon: "person-add" },
-  { label: "Membership\n& Benefits", icon: "star" },
-  { label: "Relationship\nManager", icon: "people" },
-];
-
 /** ₹18,000 -> ₹18K, so the stat tile never wraps. */
 const compactRupees = (value: number): string => {
   if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
@@ -222,8 +206,6 @@ export default function ProfileScreen() {
   const { customer, logout, setAvatar } = useAuthStore();
   const applications = useApplicationStore((state) => state.applications);
 
-  const insets = useSafeAreaInsets();
-
   const [pickingPhoto, setPickingPhoto] = useState(false);
   const [showKycModal, setShowKycModal] = useState(false);
   const [showPersonalModal, setShowPersonalModal] = useState(false);
@@ -238,20 +220,6 @@ export default function ProfileScreen() {
   const totalPaid = applications
     .filter((app) => app.paymentStatus === "Paid")
     .reduce((sum, app) => sum + app.paymentAmount, 0);
-
-  /* Seal: initials from the name, "since" from the oldest application. */
-  const initials =
-    (customer?.name ?? "")
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
-      .join("") || "TX";
-
-  const memberSince = applications.reduce((earliest, app) => {
-    const year = Number(app.createdAt.slice(0, 4));
-    return Number.isFinite(year) && year < earliest ? year : earliest;
-  }, new Date().getFullYear());
 
   /* KYC reads as verified once both identity documents are on file. */
   const allDocuments = applications.flatMap((app) => app.documents);
