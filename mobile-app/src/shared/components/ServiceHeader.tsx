@@ -9,6 +9,7 @@ import {
   Image,
   ImageSourcePropType,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -23,6 +24,7 @@ interface ServiceHeaderProps {
   iconColor?: string;
   iconBg?: string;
   backgroundColor?: string;
+  gradientColors?: [string, string, ...string[]];
 }
 
 export const ServiceHeader: React.FC<ServiceHeaderProps> = ({
@@ -30,10 +32,11 @@ export const ServiceHeader: React.FC<ServiceHeaderProps> = ({
   subtitle,
   tag,
   heroImage,
-  iconName,
+  iconName = "document-text-outline",
   iconColor = "#FFFFFF",
-  iconBg = "rgba(255, 255, 255, 0.15)",
+  iconBg = "rgba(255, 255, 255, 0.18)",
   backgroundColor = BrandColors.PRIMARY_BLUE,
+  gradientColors = ["#061933", "#083B75", "#0C4A94"],
 }) => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -42,8 +45,13 @@ export const ServiceHeader: React.FC<ServiceHeaderProps> = ({
   const topPadding = Math.max(insets.top, statusBarHeight) + Spacing.xs;
 
   return (
-    <View style={[styles.headerContainer, { backgroundColor }]}>
-      <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
+    <LinearGradient
+      colors={gradientColors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.headerContainer}
+    >
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <View style={[styles.innerContainer, { paddingTop: topPadding }]}>
         {/* Top Bar: Back Button */}
         <View style={styles.topBar}>
@@ -53,11 +61,11 @@ export const ServiceHeader: React.FC<ServiceHeaderProps> = ({
             style={styles.backBtn}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+            <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
-        {/* Main Title Row */}
+        {/* Main Title Row with Icon */}
         <View style={styles.titleSection}>
           {iconName && (
             <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
@@ -80,68 +88,76 @@ export const ServiceHeader: React.FC<ServiceHeaderProps> = ({
           </View>
         )}
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   headerContainer: {
-    paddingBottom: Spacing.base,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     ...Shadows.md,
   },
   innerContainer: {
-    paddingHorizontal: Spacing.base,
+    paddingHorizontal: Spacing.base + 4,
   },
   topBar: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.base,
   },
   backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
   },
   titleSection: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.md,
+    gap: 14,
     marginTop: Spacing.xs,
   },
   iconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.md,
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
     justifyContent: "center",
     alignItems: "center",
   },
   titleCol: {
     flex: 1,
+    justifyContent: "center",
   },
   tagText: {
-    fontSize: 12,
-    color: "#E2E8F0",
-    fontWeight: Typography.fontWeight.semiBold,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.85)",
+    fontWeight: "600",
+    letterSpacing: 0.2,
+    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
+    marginBottom: 3,
   },
   titleText: {
-    fontSize: 24,
-    fontWeight: Typography.fontWeight.extraBold,
+    fontSize: 27,
+    fontWeight: "700",
     color: "#FFFFFF",
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
+    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   subtitleText: {
-    fontSize: 13,
-    color: "#E2E8F0",
-    lineHeight: 18,
-    marginTop: Spacing.sm,
-    fontWeight: Typography.fontWeight.medium,
+    fontSize: 15.5,
+    color: "rgba(255, 255, 255, 0.95)",
+    lineHeight: 22,
+    marginTop: 14,
+    fontWeight: "400",
+    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
   heroImageCard: {
     marginTop: Spacing.md,
@@ -157,3 +173,4 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
+

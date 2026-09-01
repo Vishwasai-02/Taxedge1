@@ -103,7 +103,7 @@ export default function LoginScreen() {
           {/* Logo & Brand Header */}
           <View style={styles.headerSection}>
             <Image
-              source={require("../../../assets/images/logo.png")}
+              source={require("../../../assets/images/icon.png")}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -222,24 +222,7 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
  
-            {/* Create Account Single Line */}
-            <View style={styles.createAccountRow}>
-              <Text style={[styles.newToText, { color: colors.textSecondary }]}>
-                New to TaxEdge?
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={handleCreateAccount}
-                style={styles.createAccountTouch}
-              >
-                <Text
-                  style={[styles.createAccountLink, { color: colors.primary }]}
-                >
-                  Create Account
-                </Text>
-              </TouchableOpacity>
-            </View>
- 
+     
           </View>
         </View>
       </ScrollView>
@@ -393,4 +376,3 @@ const styles = StyleSheet.create({
   },
  
 });
- 
