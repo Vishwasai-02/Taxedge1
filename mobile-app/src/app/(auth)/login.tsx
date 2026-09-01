@@ -118,7 +118,7 @@ export default function LoginScreen() {
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={[styles.welcomeTitle, { color: colors.text }]}>
-              Welcome Back 👋
+              Welcome Back 
             </Text>
             <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
               Login to continue with TaxEdge

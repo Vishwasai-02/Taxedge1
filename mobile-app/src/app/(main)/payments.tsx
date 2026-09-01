@@ -82,13 +82,23 @@ export default function PaymentsScreen() {
               </View>
             ) : (
               pendingPayments.map((app) => (
-                <View key={app.id} style={styles.billLineRow}>
+                <TouchableOpacity
+                  key={app.id}
+                  activeOpacity={0.75}
+                  onPress={() =>
+                    router.push({ pathname: "/payment/[id]", params: { id: app.id } })
+                  }
+                  style={styles.billLineRow}
+                >
                   <View>
                     <Text style={[styles.billName, { color: colors.text }]}>{app.serviceName}</Text>
                     <Text style={[styles.billStatus, { color: colors.orange }]}>Pending</Text>
                   </View>
-                  <Text style={[styles.billAmt, { color: colors.text }]}>₹{app.paymentAmount.toLocaleString()}</Text>
-                </View>
+                  <View style={styles.billRight}>
+                    <Text style={[styles.billAmt, { color: colors.text }]}>₹{app.paymentAmount.toLocaleString()}</Text>
+                    <Ionicons name="chevron-forward" size={15} color={colors.textSecondary} />
+                  </View>
+                </TouchableOpacity>
               ))
             )}
           </View>
@@ -297,6 +307,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  billRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   billName: {
     fontSize: 14,

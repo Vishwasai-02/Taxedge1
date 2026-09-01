@@ -112,11 +112,18 @@ function Sparkle({ beat, dx, dy, size, delay }: SparkleProps) {
 export interface SavingsJarAnimationProps {
   accent?: string;
   walletColor?: string;
+  /**
+   * Uniform scale of the whole scene, 1 = full size. The negative margins pull
+   * the laid-out box in by the same amount, so a scaled-down scene takes up
+   * proportionally less room in its parent instead of leaving empty space.
+   */
+  scale?: number;
 }
 
 export function SavingsJarAnimation({
   accent = "#F97316",
   walletColor = "#FFFFFF",
+  scale = 1,
 }: SavingsJarAnimationProps) {
   const clock = useSharedValue(0);
   const beat = useSharedValue(0);
@@ -179,7 +186,17 @@ export function SavingsJarAnimation({
   });
 
   return (
-    <View style={styles.scene} pointerEvents="none">
+    <View
+      style={[
+        styles.scene,
+        scale !== 1 && {
+          transform: [{ scale }],
+          marginVertical: (-SCENE_H * (1 - scale)) / 2,
+          marginHorizontal: (-SCENE_W * (1 - scale)) / 2,
+        },
+      ]}
+      pointerEvents="none"
+    >
       <Animated.View style={[styles.glow, glowStyle]} />
 
       <Coin clock={clock} offset={0} x={SCENE_W / 2 - COIN / 2 - 13} accent={accent} />

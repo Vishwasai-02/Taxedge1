@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
@@ -23,7 +22,6 @@ export default function ApplicationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const applications = useApplicationStore((state) => state.applications);
   const uploadDocument = useApplicationStore((state) => state.uploadDocument);
-  const payApplication = useApplicationStore((state) => state.payApplication);
   const app = applications.find((a) => a.id === id);
 
   if (!app) {
@@ -47,23 +45,7 @@ export default function ApplicationDetailScreen() {
   };
 
   const handlePayNow = () => {
-    Alert.alert(
-      "Proceed with Payment",
-      `Complete payment of ₹${app.paymentAmount.toLocaleString()} for ${app.serviceName}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Pay Mock Fee",
-          onPress: () => {
-            payApplication(app.id);
-            Alert.alert(
-              "Payment Successful",
-              "Receipt added to payment history.",
-            );
-          },
-        },
-      ],
-    );
+    router.push({ pathname: "/payment/[id]", params: { id: app.id } });
   };
 
   return (

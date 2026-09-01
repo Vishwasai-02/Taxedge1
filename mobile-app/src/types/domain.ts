@@ -9,9 +9,7 @@ import type { Ionicons } from "@expo/vector-icons";
 /** Any glyph name accepted by `<Ionicons name={...} />`. */
 export type IconName = keyof typeof Ionicons.glyphMap;
 
-/* ------------------------------------------------------------------ */
-/* Services                                                            */
-/* ------------------------------------------------------------------ */
+
 
 export type ServiceCategoryId =
   | "GST"
@@ -52,7 +50,6 @@ export interface ServiceCategory {
 
 export interface CatalogueItem {
   label: string;
-  /** Set only when a matching entry exists in `data/services`. */
   serviceId?: string;
 }
 
@@ -65,9 +62,6 @@ export interface CatalogueSection {
   items: CatalogueItem[];
 }
 
-/* ------------------------------------------------------------------ */
-/* Applications                                                        */
-/* ------------------------------------------------------------------ */
 
 export type DocumentStatus = "Uploaded" | "Pending" | "Rejected";
 
