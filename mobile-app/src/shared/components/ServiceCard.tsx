@@ -1,18 +1,28 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { BrandColors, Colors, Typography, Spacing, BorderRadius, Shadows } from "../theme";
+import { BrandColors, Typography, Spacing, BorderRadius, Shadows } from "../theme";
 import { ScalePressable } from "./ScalePressable";
 
 export interface ServiceCardData {
   id: string;
   title: string;
   description: string;
-  iconName: string;
-  iconColor: string;
-  iconBg: string;
+  iconName?: string;
+  iconType?:
+    | "registration"
+    | "filing"
+    | "compliance"
+    | "amendment"
+    | "cancellation"
+    | "certificate"
+    | string;
+  iconColor?: string;
+  iconBg?: string;
   route: string;
   badgeText?: string;
+  badgeColor?: string;
+  badgeBg?: string;
   badgeVariant?: "start" | "rate" | "custom";
   rateText?: string;
 }
@@ -22,18 +32,85 @@ interface ServiceCardProps {
   onPress?: (item: ServiceCardData) => void;
 }
 
+const renderCardIcon = (item: ServiceCardData) => {
+  const bg = item.iconBg || "#EDF9F3";
+
+  if (item.iconType === "registration" || item.id === "gst-registration") {
+    return (
+      <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
+        <View style={styles.compositeIconContainer}>
+          <Ionicons name="document-text" size={22} color="#CBD5E1" />
+          <View style={styles.pencilOverlay}>
+            <Ionicons name="pencil" size={14} color="#F43F5E" />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (item.iconType === "filing" || item.id === "gst-filing") {
+    return (
+      <View style={[styles.iconWrapper, { backgroundColor: item.iconBg || "#EDF9F3" }]}>
+        <View style={styles.chartBarsContainer}>
+          <View style={[styles.chartBar, { height: 11, backgroundColor: "#F43F5E" }]} />
+          <View style={[styles.chartBar, { height: 17, backgroundColor: "#06B6D4" }]} />
+          <View style={[styles.chartBar, { height: 23, backgroundColor: "#3B82F6" }]} />
+        </View>
+      </View>
+    );
+  }
+
+  if (item.iconType === "compliance" || item.id === "gst-compliance") {
+    return (
+      <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
+        <View style={styles.greenCheckBadge}>
+          <Ionicons name="checkmark-sharp" size={14} color="#FFFFFF" />
+        </View>
+      </View>
+    );
+  }
+
+  if (item.iconType === "amendment" || item.id === "gst-amendment") {
+    return (
+      <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
+        <Ionicons name="pencil" size={22} color="#F97316" />
+      </View>
+    );
+  }
+
+  if (item.iconType === "cancellation" || item.id === "gst-cancellation") {
+    return (
+      <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
+        <Ionicons name="ban" size={22} color="#EF4444" />
+      </View>
+    );
+  }
+
+  if (item.iconType === "certificate" || item.id === "gst-certificate") {
+    return (
+      <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
+        <Ionicons name="ribbon" size={22} color="#F59E0B" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
+      <Ionicons
+        name={(item.iconName || "document-text") as any}
+        size={22}
+        color={item.iconColor || BrandColors.PRIMARY_BLUE}
+      />
+    </View>
+  );
+};
+
 export const ServiceCard: React.FC<ServiceCardProps> = ({ item, onPress }) => {
   return (
     <ScalePressable onPress={() => onPress?.(item)} style={styles.container}>
       <View style={styles.card}>
         {/* Left Icon Container */}
-        <View style={[styles.iconWrapper, { backgroundColor: item.iconBg }]}>
-          <Ionicons
-            name={item.iconName as any}
-            size={22}
-            color={item.iconColor}
-          />
-        </View>
+        {renderCardIcon(item)}
 
         {/* Center Details */}
         <View style={styles.detailsCol}>
@@ -46,8 +123,20 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ item, onPress }) => {
         {/* Right Action / Badges */}
         <View style={styles.rightCol}>
           {item.badgeText && (
-            <View style={styles.orangeBadge}>
-              <Text style={styles.orangeBadgeText}>{item.badgeText}</Text>
+            <View
+              style={[
+                styles.badgePill,
+                item.badgeBg ? { backgroundColor: item.badgeBg } : null,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.badgeText,
+                  item.badgeColor ? { color: item.badgeColor } : null,
+                ]}
+              >
+                {item.badgeText}
+              </Text>
             </View>
           )}
 
@@ -57,8 +146,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ item, onPress }) => {
 
           <Ionicons
             name="chevron-forward"
-            size={18}
-            color={BrandColors.CHEVRON_BLUE}
+            size={15}
+            color="#94A3B8"
             style={styles.chevron}
           />
         </View>
@@ -69,69 +158,112 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ item, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: Spacing.sm + 4,
+    marginBottom: 13,
   },
   card: {
-    backgroundColor: BrandColors.CARD,
-    borderRadius: BorderRadius.base,
-    paddingVertical: 14,
-    paddingHorizontal: Spacing.base,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: BrandColors.CARD_BORDER,
-    ...Shadows.sm,
+    borderColor: "#EEF2F6",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0F172A",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   iconWrapper: {
-    width: 46,
-    height: 46,
-    borderRadius: BorderRadius.md,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: Spacing.md,
+    marginRight: 14,
+  },
+  compositeIconContainer: {
+    width: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  pencilOverlay: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+  },
+  chartBarsContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 3,
+    height: 24,
+  },
+  chartBar: {
+    width: 5,
+    borderRadius: 2,
+  },
+  greenCheckBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
   },
   detailsCol: {
     flex: 1,
     justifyContent: "center",
   },
   titleText: {
-    fontSize: Typography.fontSize.md,
-    fontWeight: Typography.fontWeight.bold,
-    color: BrandColors.TEXT_PRIMARY,
+    fontSize: 16.5,
+    fontWeight: "700",
+    color: "#1E293B",
     letterSpacing: -0.2,
-    marginBottom: 2,
+    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   descText: {
-    fontSize: Typography.fontSize.sm,
-    color: BrandColors.TEXT_SECONDARY,
-    lineHeight: 16,
-    fontWeight: Typography.fontWeight.regular,
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 17.5,
+    marginTop: 3,
+    fontWeight: "400",
+    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
   rightCol: {
     alignItems: "flex-end",
-    justifyContent: "center",
-    marginLeft: Spacing.sm,
-    gap: 4,
+    justifyContent: "space-between",
+    height: 48,
+    marginLeft: 8,
   },
-  orangeBadge: {
-    backgroundColor: BrandColors.PRIMARY_LIGHT_ORANGE,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.full,
-    marginBottom: 2,
+  badgePill: {
+    backgroundColor: "#E6F7EF",
+    paddingHorizontal: 11,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  orangeBadgeText: {
-    color: BrandColors.PRIMARY_ORANGE,
+  badgeText: {
+    color: "#10B981",
     fontSize: 11,
-    fontWeight: Typography.fontWeight.bold,
+    fontWeight: "700",
+    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   rateText: {
     color: BrandColors.PRIMARY_ORANGE,
     fontSize: 12,
-    fontWeight: Typography.fontWeight.bold,
-    marginBottom: 2,
+    fontWeight: "700",
   },
   chevron: {
-    marginTop: 1,
+    marginTop: "auto",
   },
 });
+

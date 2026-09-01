@@ -9,9 +9,9 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useTheme } from "../../hooks/use-theme";
-import { SERVICES, CATEGORIES } from "../../data/services";
-import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
+import { useTheme } from "../hooks/use-theme";
+import { SERVICES, CATEGORIES } from "../data/services";
+import { ScreenLayout } from "../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -143,7 +143,11 @@ export default function ServicesScreen() {
       <FlatList
         data={filteredServices}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.listContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]}
+        contentContainerStyle={[
+          styles.listContent,
+          // Pushed screen, not a tab: no floating bar to clear, just the inset.
+          { paddingBottom: insets.bottom + 24 },
+        ]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

@@ -10,6 +10,7 @@ import {
   Modal,
   Pressable,
   StatusBar,
+  TextInput,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
@@ -75,12 +76,6 @@ interface ApplyBanner {
   bg: string;
 }
 
-interface MenuItem {
-  label: string;
-  icon: IconName;
-  route: Href;
-}
-
 /** Anything carrying the two-tone palette used by the tiles and stat cards. */
 interface Tinted {
   tint: string;
@@ -106,7 +101,7 @@ const SERVICE_TILES: ServiceTile[] = [
   { id: "gst-reg", label: "GST Reg.", icon: "create", tint: "#1D4ED8", tintBg: "#E8EFFD", route: "/service/gst-registration" },
   { id: "gst-filing", label: "GST Filing", icon: "cloud-upload", tint: "#0891B2", tintBg: "#E5F5F9", route: "/service/gst-filing" },
   { id: "compliance", label: "Compliance", icon: "checkmark-done-circle", tint: "#059669", tintBg: "#E6F5F0", route: "/service/gst-compliance" },
-  { id: "consultation", label: "Tax Advice", icon: "chatbubbles", tint: "#B45309", tintBg: "#FBF1E3", route: "/(main)/services" },
+  { id: "consultation", label: "Tax Advice", icon: "chatbubbles", tint: "#B45309", tintBg: "#FBF1E3", route: "/services" },
 
   { id: "personal-loan", label: "Personal Loan", icon: "person", tint: "#D97706", tintBg: "#FDF2E3", route: "/service/personal-loan" },
   { id: "working-capital", label: "Working Cap.", icon: "trending-up", tint: "#047857", tintBg: "#E5F3EF", route: "/service/working-capital" },
@@ -187,16 +182,6 @@ const APPLY_BANNERS: ApplyBanner[] = (
   bg: i % 2 === 0 ? BANNER_NAVY : BANNER_NAVY_DEEP,
 }));
 
-const MENU_ITEMS: MenuItem[] = [
-  { label: "Home", icon: "home-outline", route: "/(main)/home" },
-  { label: "Services", icon: "grid-outline", route: "/(main)/services" },
-  { label: "Applications", icon: "document-text-outline", route: "/(main)/applications" },
-  { label: "Payments", icon: "cash-outline", route: "/(main)/payments" },
-  { label: "GST Index", icon: "book-outline", route: "/(main)/gst" },
-  { label: "Notifications", icon: "notifications-outline", route: "/notifications" },
-  { label: "Profile", icon: "person-outline", route: "/(main)/profile" },
-];
-
 export default function HomeScreen() {
   const colors = useTheme();
   const scheme = useColorScheme();
@@ -205,8 +190,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   const [bannerPage, setBannerPage] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [moreQuery, setMoreQuery] = useState("");
   const bannerRef = useRef<ScrollView>(null);
   const bannerPageRef = useRef(0);
 
@@ -251,14 +236,9 @@ export default function HomeScreen() {
 
   const handleExploreCategory = (categoryId: ServiceCategoryId) => {
     router.push({
-      pathname: "/(main)/services",
+      pathname: "/services",
       params: { selectedCategory: categoryId },
     });
-  };
-
-  const go = (route: Href) => {
-    setMenuOpen(false);
-    router.push(route);
   };
 
   const openCatalogueItem = (
@@ -275,12 +255,24 @@ export default function HomeScreen() {
 
   const openTile = (tile: ServiceTile) => {
     if (tile.isMore) {
+      setMoreQuery("");
       setMoreOpen(true);
       return;
     }
     setMoreOpen(false);
     if (tile.route) router.push(tile.route);
   };
+
+  /* Catalogue narrowed by the sheet's search box; empty sections drop out. */
+  const catalogueQuery = moreQuery.trim().toLowerCase();
+  const filteredCatalogue = SERVICE_CATALOGUE.map((group) => ({
+    ...group,
+    items: catalogueQuery
+      ? group.items.filter((item) =>
+          item.label.toLowerCase().includes(catalogueQuery),
+        )
+      : group.items,
+  })).filter((group) => group.items.length > 0);
 
   const onBannerScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const page = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
@@ -306,18 +298,32 @@ export default function HomeScreen() {
       {/* ---------- Blue hero header ---------- */}
       <View style={[styles.heroHeader, { backgroundColor: colors.primaryDark, paddingTop: insets.top + 8 }]}>
         <View style={styles.topHeaderRow}>
-          <TouchableOpacity onPress={() => setMenuOpen(true)} style={styles.menuBtn} hitSlop={8}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/(main)/profile")}
+            style={styles.menuBtn}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Open profile"
+          >
             <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
 
           <View style={styles.brandContainer}>
-            <View style={styles.logoBox}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push("/(main)/profile")}
+              style={styles.logoBox}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Open profile"
+            >
               <Image
                 source={require("../../../assets/images/logo.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
-            </View>
+            </TouchableOpacity>
             <View>
               <Text style={styles.brandText}>TAXEDGE</Text>
               <Text style={styles.brandSubText}>FIN SOLUTIONS</Text>
@@ -333,13 +339,6 @@ export default function HomeScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/(main)/profile")} style={styles.iconBtn} hitSlop={6}>
-              {customer?.avatarUri ? (
-                <Image source={{ uri: customer.avatarUri }} style={styles.headerAvatar} />
-              ) : (
-                <Ionicons name="person-circle-outline" size={28} color="#FFFFFF" />
-              )}
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -348,17 +347,8 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>Hello, {customerName} 👋</Text>
             <Text style={styles.welcomeSubText}>What can we help you with today?</Text>
           </View>
-          <SavingsJarAnimation accent={colors.orange} />
+          <SavingsJarAnimation accent={colors.orange} scale={0.8} />
         </View>
-
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => router.push("/(main)/services")}
-          style={styles.searchBar}
-        >
-          <Ionicons name="search" size={20} color="#94A3B8" />
-          <Text style={styles.searchPlaceholder}>Search services, applications, documents...</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -610,143 +600,137 @@ export default function HomeScreen() {
         animationType="slide"
         onRequestClose={() => setMoreOpen(false)}
       >
-        <Pressable style={styles.sheetBackdrop} onPress={() => setMoreOpen(false)}>
+        <Pressable
+          style={styles.sheetBackdrop}
+          onPress={() => setMoreOpen(false)}
+        >
           <Pressable
             style={[
               styles.sheet,
-              { backgroundColor: colors.backgroundElement, paddingBottom: insets.bottom + 12 },
+              {
+                backgroundColor: colors.background,
+                paddingBottom: insets.bottom + 12,
+              },
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-
             <View style={styles.sheetHeader}>
-              <View>
-                <Text style={[styles.sheetTitle, { color: colors.text }]}>Explore Services</Text>
-                <Text style={[styles.sheetSubtitle, { color: colors.textSecondary }]}>
-                  Everything TaxEdge can file, fund and cover
-                </Text>
-              </View>
+              <Text style={[styles.sheetTitle, { color: colors.text }]}>
+                Explore Services
+              </Text>
               <TouchableOpacity onPress={() => setMoreOpen(false)} hitSlop={10}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
+                <Text style={[styles.sheetDone, { color: colors.orange }]}>
+                  Done
+                </Text>
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {SERVICE_CATALOGUE.map((group, groupIndex) => (
-                <View
-                  key={`${group.id}-${groupIndex}`}
-                  style={[
-                    styles.catGroup,
-                    { backgroundColor: colors.background, borderColor: colors.border },
-                  ]}
-                >
+            <View
+              style={[
+                styles.sheetSearch,
+                {
+                  backgroundColor: colors.backgroundElement,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Ionicons name="search" size={17} color={colors.textSecondary} />
+              <TextInput
+                value={moreQuery}
+                onChangeText={setMoreQuery}
+                placeholder="Search services..."
+                placeholderTextColor={colors.textSecondary}
+                style={[styles.sheetSearchInput, { color: colors.text }]}
+                autoCorrect={false}
+                returnKeyType="search"
+              />
+              {moreQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setMoreQuery("")} hitSlop={8}>
+                  <Ionicons
+                    name="close-circle"
+                    size={17}
+                    color={colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.sheetScrollContent}
+            >
+              {filteredCatalogue.map((group, groupIndex) => (
+                <View key={`${group.id}-${groupIndex}`}>
                   <View style={styles.catHeader}>
                     <View
                       style={[
                         styles.catIcon,
-                        { backgroundColor: isDark ? colors.backgroundSelected : group.tintBg },
+                        {
+                          backgroundColor: isDark
+                            ? colors.backgroundSelected
+                            : "#E8EFF7",
+                        },
                       ]}
                     >
                       <Ionicons
                         name={group.icon}
-                        size={20}
-                        color={isDark ? colors.text : group.tint}
+                        size={16}
+                        color={colors.primary}
                       />
                     </View>
-                    <View style={styles.catHeaderText}>
-                      <Text style={[styles.catTitle, { color: colors.text }]}>{group.title}</Text>
-                      <Text style={[styles.catCount, { color: colors.textSecondary }]}>
-                        {group.items.length} services
-                      </Text>
-                    </View>
+                    <Text style={[styles.catTitle, { color: colors.text }]}>
+                      {group.title}
+                    </Text>
                   </View>
 
-                  <View style={styles.chipWrap}>
-                    {group.items.map((item) => (
-                      <TouchableOpacity
-                        key={item.label}
-                        activeOpacity={0.75}
-                        onPress={() => openCatalogueItem(item, group.id)}
-                        style={[
-                          styles.chip,
-                          { backgroundColor: colors.backgroundElement, borderColor: colors.border },
-                        ]}
+                  {group.items.map((item) => (
+                    <TouchableOpacity
+                      key={item.label}
+                      activeOpacity={0.75}
+                      onPress={() => openCatalogueItem(item, group.id)}
+                      style={[
+                        styles.serviceRow,
+                        {
+                          backgroundColor: colors.backgroundElement,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.serviceRowText, { color: colors.text }]}
                       >
-                        <View
-                          style={[
-                            styles.chipDot,
-                            { backgroundColor: isDark ? colors.textSecondary : group.tint },
-                          ]}
-                        />
-                        <Text style={[styles.chipText, { color: colors.text }]}>{item.label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                        {item.label}
+                      </Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={17}
+                        color={colors.textSecondary}
+                      />
+                    </TouchableOpacity>
+                  ))}
                 </View>
               ))}
 
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => {
-                  setMoreOpen(false);
-                  router.push("/(main)/services");
-                }}
-                style={[styles.sheetCta, { backgroundColor: colors.primary }]}
-              >
-                <Text style={styles.sheetCtaText}>Browse full catalogue</Text>
-                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
+              {filteredCatalogue.length === 0 && (
+                <View style={styles.sheetEmpty}>
+                  <Ionicons
+                    name="search-outline"
+                    size={34}
+                    color={colors.textSecondary}
+                  />
+                  <Text
+                    style={[styles.sheetEmptyText, { color: colors.text }]}
+                  >
+                    No services match "{moreQuery.trim()}"
+                  </Text>
+                </View>
+              )}
             </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
 
-      {/* ---------- Side menu ---------- */}
-      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
-        <Pressable style={styles.menuBackdrop} onPress={() => setMenuOpen(false)}>
-          <Pressable
-            style={[styles.menuPanel, { backgroundColor: colors.backgroundElement, paddingTop: insets.top + 16 }]}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={styles.menuHeader}>
-              {customer?.avatarUri ? (
-                <Image source={{ uri: customer.avatarUri }} style={styles.menuAvatar} />
-              ) : (
-                <View style={[styles.logoBox, { backgroundColor: colors.primaryDark }]}>
-                  <Image
-                    source={require("../../../assets/images/logo.png")}
-                    style={styles.logo}
-                    resizeMode="contain"
-                  />
-                </View>
-              )}
-              <View>
-                <Text style={[styles.menuBrand, { color: colors.text }]}>
-                  {customer?.name || "TAXEDGE"}
-                </Text>
-                <Text style={[styles.menuBrandSub, { color: colors.textSecondary }]}>
-                  {customer?.customerId || "FIN SOLUTIONS"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
-
-            {MENU_ITEMS.map((item) => (
-              <TouchableOpacity
-                key={item.label}
-                activeOpacity={0.75}
-                onPress={() => go(item.route)}
-                style={styles.menuItem}
-              >
-                <Ionicons name={item.icon} size={20} color={colors.primary} />
-                <Text style={[styles.menuItemText, { color: colors.text }]}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
@@ -759,7 +743,7 @@ const styles = StyleSheet.create({
   /* Header */
   heroHeader: {
     paddingHorizontal: H_PADDING,
-    paddingBottom: 18,
+    paddingBottom: 12,
   },
   topHeaderRow: {
     flexDirection: "row",
@@ -808,18 +792,6 @@ const styles = StyleSheet.create({
   iconBtn: {
     padding: 2,
   },
-  headerAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.75)",
-  },
-  menuAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-  },
   badge: {
     position: "absolute",
     top: -4,
@@ -841,13 +813,12 @@ const styles = StyleSheet.create({
 
   greetingRow: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    marginTop: 18,
+    alignItems: "center",
+    marginTop: 12,
   },
   greetingContainer: {
     flex: 1,
     paddingRight: 8,
-    paddingBottom: 6,
   },
   welcomeText: {
     color: "#FFFFFF",
@@ -859,23 +830,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
     fontWeight: "500",
-  },
-
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    height: 50,
-    paddingHorizontal: 16,
-    marginTop: 20,
-  },
-  searchPlaceholder: {
-    color: "#94A3B8",
-    fontSize: 14,
-    fontWeight: "500",
-    flex: 1,
   },
 
   /* Scroll body */
@@ -1012,104 +966,87 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sheet: {
-    maxHeight: "88%",
+    height: "92%",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  sheetHandle: {
-    width: 44,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 14,
+    paddingHorizontal: 16,
+    paddingTop: 18,
   },
   sheetHeader: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 18,
+    marginBottom: 14,
   },
   sheetTitle: {
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: "800",
   },
-  sheetSubtitle: {
-    fontSize: 12.5,
+  sheetDone: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  sheetSearch: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+  },
+  sheetSearchInput: {
+    flex: 1,
+    fontSize: 14,
     fontWeight: "500",
-    marginTop: 3,
+    padding: 0,
+  },
+  sheetScrollContent: {
+    paddingTop: 6,
+    paddingBottom: 12,
   },
 
   /* Catalogue groups */
-  catGroup: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-    marginBottom: 14,
-  },
   catHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
+    gap: 10,
+    marginTop: 18,
+    marginBottom: 10,
   },
   catIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
-  },
-  catHeaderText: {
-    flex: 1,
   },
   catTitle: {
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
-  catCount: {
-    fontSize: 11.5,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  chipWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
+  serviceRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
-    paddingLeft: 10,
-    paddingRight: 13,
-    height: 34,
-    borderRadius: 17,
+    justifyContent: "space-between",
+    height: 52,
+    borderRadius: 12,
     borderWidth: 1,
+    paddingHorizontal: 16,
+    marginBottom: 8,
   },
-  chipDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+  serviceRowText: {
+    fontSize: 14.5,
+    fontWeight: "500",
   },
-  chipText: {
-    fontSize: 12.5,
-    fontWeight: "600",
-  },
-  sheetCta: {
-    flexDirection: "row",
+  sheetEmpty: {
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 48,
-    borderRadius: 14,
-    marginTop: 24,
+    gap: 10,
+    paddingVertical: 56,
   },
-  sheetCtaText: {
-    color: "#FFFFFF",
+  sheetEmptyText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "600",
   },
   dotsRow: {
     flexDirection: "row",
@@ -1321,48 +1258,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 13.5,
     fontWeight: "800",
-  },
-
-  /* Side menu */
-  menuBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(5,39,80,0.45)",
-    flexDirection: "row",
-  },
-  menuPanel: {
-    width: Math.min(width * 0.76, 320),
-    height: "100%",
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  menuHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  menuBrand: {
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  menuBrandSub: {
-    fontSize: 10,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  menuDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 18,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingVertical: 14,
-  },
-  menuItemText: {
-    fontSize: 15,
-    fontWeight: "600",
   },
 });

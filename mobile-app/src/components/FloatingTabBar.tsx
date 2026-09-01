@@ -30,11 +30,8 @@ import type { IconName } from "../types/domain";
  * Layout is entirely flex-based: every tab is `flex: 1`, so the row divides the
  * bar evenly whatever the tab count and nothing can overflow on a narrow device.
  *
- * NOTE: swapping in expo-blur is a two-line change once it is installed -
- * import { BlurView } from "expo-blur" and replace the <View style={styles.bar}>
- * with <BlurView intensity={40} tint="dark" style={styles.bar}>. Same for
- * lucide-react-native: replace <Ionicons .../> in TabItem with the lucide icon
- * named in TAB_META.lucide.
+ * NOTE: swapping in lucide-react-native is a mechanical change - replace
+ * <Ionicons .../> in TabItem with the lucide icon named in TAB_META.lucide.
  */
 
 export const FLOATING_TAB_HEIGHT = 64;
@@ -76,8 +73,8 @@ function metaFor(routeName: string): TabMeta {
 
 const TAB_META: Record<string, TabMeta> = {
   home: { label: "Home", icon: "home", iconOutline: "home-outline", lucide: "House" },
-  services: { label: "Services", icon: "grid", iconOutline: "grid-outline", lucide: "LayoutGrid" },
-  applications: { label: "Applications", icon: "document-text", iconOutline: "document-text-outline", lucide: "FileText" },
+  applications: { label: "Applications", icon: "grid", iconOutline: "grid-outline", lucide: "LayoutGrid" },
+  documents: { label: "Documents", icon: "document-text", iconOutline: "document-text-outline", lucide: "FileText" },
   payments: { label: "Payments", icon: "card", iconOutline: "card-outline", lucide: "CreditCard" },
   profile: { label: "Profile", icon: "person", iconOutline: "person-outline", lucide: "User" },
   gst: { label: "GST Index", icon: "book", iconOutline: "book-outline", lucide: "BookOpen" },
@@ -160,7 +157,7 @@ export function FloatingTabBar({
           const options = descriptors[route.key].options as
             BottomTabNavigationOptions & { href?: Href | null };
           // Skip routes expo-router has hidden, and the GST index, which is
-          // reachable from the menu and the Quick Services tile instead.
+          // reachable from the Quick Services tiles instead.
           if (options.href === null) return null;
           if (HIDDEN_FROM_BAR.has(route.name.split("/")[0])) return null;
 
@@ -219,8 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: FLOATING_TAB_HEIGHT / 2,
     overflow: "hidden",
 
-    // Glass: translucent navy + hairline highlight. Replace with BlurView
-    // once expo-blur is installed; the colours below already read as glass.
+    // Glass: translucent navy + hairline highlight.
     backgroundColor: "rgba(9,38,72,0.72)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.24)",
