@@ -75,13 +75,10 @@ export default function LoginScreen() {
   };
 
   const handleCreateAccount = () => {
-    if (mobile.length !== 10 || !/^\d+$/.test(mobile)) {
-      setError("Please enter a valid 10-digit mobile number");
-      return;
+    if (mobile.length === 10) {
+      setMobileNumber(mobile);
     }
-    setError("");
-    setMobileNumber(mobile);
-    router.push("/(auth)/otp");
+    router.push("/(auth)/register");
   };
 
   return (
