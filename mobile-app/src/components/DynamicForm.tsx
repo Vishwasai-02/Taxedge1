@@ -22,16 +22,18 @@ export interface DynamicFormProps {
   fields: FormField[];
   onSubmit: (values: ApplicationFormData) => void;
   submitButtonText?: string;
+  initialValues?: ApplicationFormData;
 }
 
 export function DynamicForm({
   fields,
   onSubmit,
   submitButtonText = "Submit",
+  initialValues = {},
 }: DynamicFormProps) {
   const colors = useTheme();
   // Track form values and validation errors
-  const [formValues, setFormValues] = useState<ApplicationFormData>({});
+  const [formValues, setFormValues] = useState<ApplicationFormData>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Dropdown modal state
