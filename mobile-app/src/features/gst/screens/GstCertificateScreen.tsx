@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   placeholderBox: { width: 38 },
   scrollView: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 120, gap: 14 },
+  scrollContent: { padding: 16, paddingBottom: 240, gap: 14, flexGrow: 1 },
   fieldGroup: { gap: 6 },
   label: { fontSize: 13, fontWeight: "600", color: BrandColors.TEXT_PRIMARY },
   star: { color: "#EF4444" },
