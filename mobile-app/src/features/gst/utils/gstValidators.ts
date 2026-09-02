@@ -39,7 +39,7 @@ export const GstValidators = {
   },
 
   /**
-   * Validates Indian 15-character GSTIN (e.g. 29AKHIL1234K1Z5)
+   * Validates Indian 15-character GSTIN (e.g. 29PAVAN1234K1Z5)
    */
   isValidGstin: (gstin: string): boolean => {
     const cleanGstin = gstin.trim().toUpperCase();
@@ -65,7 +65,7 @@ export const GstValidators = {
   },
 
   /**
-   * Validates UPI ID format (e.g. username@bank / akhil@paytm)
+   * Validates UPI ID format (e.g. username@bank / pavan@ybl)
    */
   isValidUpi: (upi: string): boolean => {
     const cleanUpi = upi.trim();
@@ -78,5 +78,51 @@ export const GstValidators = {
    */
   isNotEmpty: (str: string, minLength: number = 2): boolean => {
     return str.trim().length >= minLength;
+  },
+
+  /**
+   * Validates Debit / Credit Card number (16 digits)
+   */
+  isValidCardNumber: (cardNumber: string): boolean => {
+    const cleanNum = cardNumber.replace(/[\s-]/g, "");
+    return /^\d{16}$/.test(cleanNum);
+  },
+
+  /**
+   * Validates Card Expiry Date (MM/YY)
+   */
+  isValidExpiry: (expiry: string): boolean => {
+    const cleanExp = expiry.trim();
+    return /^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(cleanExp);
+  },
+
+  /**
+   * Validates Card CVV (3 or 4 digits)
+   */
+  isValidCvv: (cvv: string): boolean => {
+    const cleanCvv = cvv.trim();
+    return /^\d{3,4}$/.test(cleanCvv);
+  },
+
+  /**
+   * Validates full card form
+   */
+  validateCard: (data: { cardNumber: string; cardHolder: string; expiry: string; cvv: string }): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (!GstValidators.isValidCardNumber(data.cardNumber)) errs.cardNumber = "Enter a valid 16-digit card number";
+    if (!GstValidators.isNotEmpty(data.cardHolder, 2)) errs.cardHolder = "Cardholder name is required";
+    if (!GstValidators.isValidExpiry(data.expiry)) errs.expiry = "Enter a valid expiry (MM/YY)";
+    if (!GstValidators.isValidCvv(data.cvv)) errs.cvv = "Enter a valid CVV";
+    return errs;
+  },
+
+  /**
+   * Validates net banking form
+   */
+  validateNetBanking: (data: { selectedBank: string; customerId: string }): Record<string, string> => {
+    const errs: Record<string, string> = {};
+    if (!GstValidators.isNotEmpty(data.selectedBank, 2)) errs.selectedBank = "Please select your bank";
+    if (!GstValidators.isNotEmpty(data.customerId, 4)) errs.customerId = "Customer / User ID is required";
+    return errs;
   },
 };

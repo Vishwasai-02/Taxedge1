@@ -37,7 +37,7 @@ export const GstFilingReviewStep: React.FC<GstFilingReviewStepProps> = ({
 
         <View style={styles.row}>
           <Text style={styles.label}>GSTIN</Text>
-          <Text style={styles.value}>29AKHIL1234K1Z5</Text>
+          <Text style={styles.value}>29PAVAN1234K1Z5</Text>
         </View>
 
         <View style={styles.row}>
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#E6F7EF",
+    backgroundColor: "#FEF0E6",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 12,
@@ -187,13 +187,13 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 13.5,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   totalValue: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   requestChangesBtn: {
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#059669",
+    borderColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 4,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   requestChangesText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
 });

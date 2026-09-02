@@ -65,7 +65,7 @@ export const GstApplicationStatusStep: React.FC = () => {
               <View style={styles.timelineLeftCol}>
                 {step.status === "completed" && (
                   <View style={styles.circleCompleted}>
-                    <Ionicons name="checkmark" size={14} color="#059669" />
+                    <Ionicons name="checkmark" size={14} color={BrandColors.PRIMARY_ORANGE} />
                   </View>
                 )}
                 {step.status === "active" && (
@@ -209,17 +209,17 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#DCFCE7",
+    backgroundColor: "#FEF0E6",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#86EFAC",
+    borderColor: "#FFD8BF",
   },
   circleActive: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   timelineTrackCompleted: {
-    backgroundColor: "#86EFAC",
+    backgroundColor: "#FFD8BF",
   },
   timelineRightCol: {
     flex: 1,
@@ -280,14 +280,14 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#059669",
+    borderColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
   },
   contactSupportBtnText: {
     fontSize: 14.5,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
 });

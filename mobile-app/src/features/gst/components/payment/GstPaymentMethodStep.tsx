@@ -11,38 +11,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { BrandColors } from "../../../../shared/theme";
 
 const PAYMENT_METHODS = [
-  {
-    id: "upi",
-    title: "UPI",
-    subtitle: "Pay via any UPI app",
-    iconName: "phone-portrait",
-    iconBg: "#DCFCE7",
-    iconColor: "#16A34A",
-  },
-  {
-    id: "debit",
-    title: "Debit Card",
-    subtitle: "Visa / Mastercard / RuPay",
-    iconName: "card",
-    iconBg: "#E0F2FE",
-    iconColor: "#0284C7",
-  },
-  {
-    id: "credit",
-    title: "Credit Card",
-    subtitle: "Visa / Mastercard / Amex",
-    iconName: "card",
-    iconBg: "#E0F2FE",
-    iconColor: "#2563EB",
-  },
-  {
-    id: "netbanking",
-    title: "Net Banking",
-    subtitle: "All major banks",
-    iconName: "business",
-    iconBg: "#F1F5F9",
-    iconColor: "#64748B",
-  },
+  { id: "upi", title: "UPI", subtitle: "Pay via any UPI app", iconName: "phone-portrait", iconBg: "#DCFCE7", iconColor: "#16A34A" },
+  { id: "debit", title: "Debit Card", subtitle: "Visa / Mastercard / RuPay", iconName: "card", iconBg: "#E0F2FE", iconColor: "#0284C7" },
+  { id: "credit", title: "Credit Card", subtitle: "Visa / Mastercard / Amex", iconName: "card", iconBg: "#E0F2FE", iconColor: "#2563EB" },
+  { id: "netbanking", title: "Net Banking", subtitle: "All major banks", iconName: "business", iconBg: "#F1F5F9", iconColor: "#64748B" },
 ];
 
 const UPI_APPS = ["PhonePe", "GPay", "Paytm", "BHIM"];
@@ -57,7 +29,7 @@ interface GstPaymentMethodStepProps {
 }
 
 export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
-  amount = "₹5,900",
+  amount = "₹2,344",
   selectedMethod,
   onSelectMethod,
   upiId,
@@ -90,20 +62,15 @@ export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
               key={method.id}
               activeOpacity={0.8}
               onPress={() => onSelectMethod(method.id)}
-              style={[
-                styles.methodCard,
-                isSelected && styles.methodCardSelected,
-              ]}
+              style={[styles.methodCard, isSelected && styles.methodCardSelected]}
             >
               <View style={[styles.methodIconBox, { backgroundColor: method.iconBg }]}>
                 <Ionicons name={method.iconName as any} size={20} color={method.iconColor} />
               </View>
-
               <View style={styles.methodTextCol}>
                 <Text style={styles.methodTitle}>{method.title}</Text>
                 <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
               </View>
-
               <View style={[styles.radioCircle, isSelected && styles.radioCircleActive]}>
                 {isSelected && <Ionicons name="checkmark" size={13} color="#FFFFFF" />}
               </View>
@@ -112,7 +79,7 @@ export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
         })}
       </View>
 
-      {/* Expanded UPI Section if UPI is selected */}
+      {/* Expanded UPI Section */}
       {selectedMethod === "upi" && (
         <View style={styles.upiCard}>
           <Text style={styles.upiLabel}>UPI ID *</Text>
@@ -120,7 +87,7 @@ export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
             style={[styles.upiInput, upiError ? styles.upiInputError : null]}
             value={upiId}
             onChangeText={onChangeUpiId}
-            placeholder="yourname@bank"
+            placeholder="pavan@ybl"
             placeholderTextColor="#94A3B8"
             autoCapitalize="none"
           />
@@ -132,7 +99,7 @@ export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
                 key={app}
                 style={styles.appPill}
                 activeOpacity={0.7}
-                onPress={() => onChangeUpiId(`akhil@${app.toLowerCase()}`)}
+                onPress={() => onChangeUpiId(`pavan@${app.toLowerCase()}`)}
               >
                 <Text style={styles.appPillText}>{app}</Text>
               </TouchableOpacity>
@@ -141,11 +108,11 @@ export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
         </View>
       )}
 
-      {/* PCI-DSS Compliance Security Note */}
+      {/* Security Note */}
       <View style={styles.securityBox}>
-        <Ionicons name="shield-checkmark-outline" size={16} color="#059669" />
+        <Ionicons name="shield-checkmark" size={16} color="#083B75" />
         <Text style={styles.securityText}>
-          Secure payment powered by encrypted transaction processing. PCI-DSS compliant.
+          Safe and secure payments with 256-bit SSL encryption
         </Text>
       </View>
     </View>
@@ -153,65 +120,23 @@ export const GstPaymentMethodStep: React.FC<GstPaymentMethodStepProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: 8,
-    gap: 12,
-  },
+  container: { paddingTop: 8, gap: 12 },
   topAmountCard: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#DCFCE7",
+    borderColor: "#EEF2F6",
   },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  discountLabel: {
-    fontSize: 13,
-    color: "#64748B",
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
-  },
-  discountValue: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: BrandColors.TEXT_PRIMARY,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
-  },
-  amountDivider: {
-    height: 1,
-    backgroundColor: "#DCFCE7",
-    marginVertical: 10,
-  },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  totalLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#059669",
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
-  },
-  totalValue: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#059669",
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
-  },
-  sectionHeading: {
-    fontSize: 14.5,
-    fontWeight: "700",
-    color: BrandColors.TEXT_PRIMARY,
-    marginTop: 4,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
-  },
-  methodsList: {
-    gap: 10,
-  },
+  topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  discountLabel: { fontSize: 13, color: "#64748B" },
+  discountValue: { fontSize: 13, fontWeight: "600", color: "#16A34A" },
+  amountDivider: { height: 1, backgroundColor: "#F1F5F9", marginBottom: 10 },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  totalLabel: { fontSize: 14, fontWeight: "700", color: BrandColors.TEXT_PRIMARY },
+  totalValue: { fontSize: 18, fontWeight: "800", color: BrandColors.PRIMARY_ORANGE },
+  sectionHeading: { fontSize: 14.5, fontWeight: "700", color: BrandColors.TEXT_PRIMARY, marginTop: 4 },
+  methodsList: { gap: 10 },
   methodCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -221,33 +146,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EEF2F6",
   },
-  methodCardSelected: {
-    backgroundColor: "#F0FDF4",
-    borderColor: "#10B981",
-  },
-  methodIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  methodTextCol: {
-    flex: 1,
-  },
-  methodTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: BrandColors.TEXT_PRIMARY,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
-  },
-  methodSubtitle: {
-    fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
-  },
+  methodCardSelected: { backgroundColor: "#FEF0E6", borderColor: BrandColors.PRIMARY_ORANGE },
+  methodIconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: "center", alignItems: "center", marginRight: 12 },
+  methodTextCol: { flex: 1 },
+  methodTitle: { fontSize: 14, fontWeight: "700", color: BrandColors.TEXT_PRIMARY },
+  methodSubtitle: { fontSize: 12, color: "#64748B", marginTop: 2 },
   radioCircle: {
     width: 22,
     height: 22,
@@ -258,25 +161,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  radioCircleActive: {
-    backgroundColor: "#059669",
-    borderColor: "#059669",
-  },
-  upiCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#EEF2F6",
-    marginTop: 2,
-  },
-  upiLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#64748B",
-    marginBottom: 6,
-    letterSpacing: 0.5,
-  },
+  radioCircleActive: { backgroundColor: BrandColors.PRIMARY_ORANGE, borderColor: BrandColors.PRIMARY_ORANGE },
+  upiCard: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#EEF2F6", marginTop: 2 },
+  upiLabel: { fontSize: 12, fontWeight: "700", color: "#64748B", marginBottom: 6, letterSpacing: 0.5 },
   upiInput: {
     height: 48,
     backgroundColor: "#F8FAFC",
@@ -287,23 +174,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: BrandColors.TEXT_PRIMARY,
     marginBottom: 8,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
-  upiInputError: {
-    borderColor: "#EF4444",
-    backgroundColor: "#FEF2F2",
-  },
-  errorText: {
-    fontSize: 11.5,
-    color: "#DC2626",
-    marginBottom: 8,
-    fontWeight: "500",
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
-  },
-  upiAppsRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  upiInputError: { borderColor: "#EF4444", backgroundColor: "#FEF2F2" },
+  errorText: { fontSize: 11.5, color: "#DC2626", marginBottom: 8, fontWeight: "500" },
+  upiAppsRow: { flexDirection: "row", gap: 8 },
   appPill: {
     flex: 1,
     height: 36,
@@ -314,28 +188,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
-  appPillText: {
-    fontSize: 11.5,
-    fontWeight: "600",
-    color: BrandColors.TEXT_PRIMARY,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
-  },
+  appPillText: { fontSize: 11.5, fontWeight: "600", color: BrandColors.TEXT_PRIMARY },
   securityBox: {
     flexDirection: "row",
-    backgroundColor: "#F0FDF4",
+    backgroundColor: "#EAF1FE",
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#DCFCE7",
+    borderColor: "#BFDBFE",
     gap: 8,
     alignItems: "center",
     marginBottom: 6,
   },
-  securityText: {
-    flex: 1,
-    fontSize: 11.5,
-    color: "#166534",
-    lineHeight: 16,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
-  },
+  securityText: { flex: 1, fontSize: 11.5, color: "#083B75", lineHeight: 16 },
 });
