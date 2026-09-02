@@ -11,14 +11,36 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ApplicationFormData, NotificationType } from "../../types/domain";
+import { ItrTypeSelectionView } from "../../features/itr/components/ItrTypeSelectionView";
+import { IncomeTypeOption, INCOME_TYPES } from "../../features/itr/types/incomeTypes";
+import { UniversalServiceWorkflowScreen } from "../../features/itr/screens/UniversalServiceWorkflowScreen";
 
 type ServiceTab = "Overview" | "Documents" | "Benefits";
+
+const ITR_SERVICE_TITLES: Record<string, string> = {
+  "itr-filing": "ITR Filing",
+  "tds-refund": "TDS Refund",
+  "previous-year-itr": "Previous Year ITR",
+  "revised-itr": "Revised ITR",
+  "tax-notice-assistance": "Tax Notice Assistance",
+};
 
 export default function ServiceDetailScreen() {
   const colors = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  // Render the Universal Service Workflow for all 5 ITR services
+  if (id && ITR_SERVICE_TITLES[id]) {
+    return (
+      <UniversalServiceWorkflowScreen
+        serviceId={id}
+        serviceName={ITR_SERVICE_TITLES[id]}
+      />
+    );
+  }
+
   const service = getServiceById(id || "");
 
   const createApplication = useApplicationStore((state) => state.createApplication);
@@ -27,6 +49,7 @@ export default function ServiceDetailScreen() {
   // UI state for details tabs & form toggle
   const [activeTab, setActiveTab] = useState<ServiceTab>("Overview");
   const [showForm, setShowForm] = useState(false);
+  const [selectedIncomeOption, setSelectedIncomeOption] = useState<IncomeTypeOption>(INCOME_TYPES[0]);
 
   if (!service) {
     return (
@@ -114,6 +137,9 @@ export default function ServiceDetailScreen() {
             
             <DynamicForm
               fields={service.formFields}
+              initialValues={{
+                incomeType: selectedIncomeOption?.formIncomeTypeValue || "Salary",
+              }}
               onSubmit={handleFormSubmit}
               submitButtonText="Continue →"
             />
@@ -123,7 +149,25 @@ export default function ServiceDetailScreen() {
     );
   }
 
-  // 2. Render Card 4 style (Service Details tabbed page)
+  // 2. Render ITR Type Selection UI for ITR Filing service
+  if (service.id === "itr-filing" || service.category === "ITR") {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <AppHeader title={service.name} showBack />
+        <ItrTypeSelectionView
+          serviceTitle={service.name}
+          serviceDescription={service.description}
+          buttonText="Start Application"
+          onContinue={(option) => {
+            setSelectedIncomeOption(option);
+            setShowForm(true);
+          }}
+        />
+      </View>
+    );
+  }
+
+  // 3. Render Card 4 style (Service Details tabbed page for other services)
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <AppHeader title={service.name} showBack />
