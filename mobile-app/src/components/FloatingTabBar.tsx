@@ -37,9 +37,9 @@ import type { IconName } from "../types/domain";
 export const FLOATING_TAB_HEIGHT = 64;
 export const FLOATING_TAB_GAP = 12;
 
-const ACTIVE_BG = "rgba(255,255,255,0.97)";
-const ACTIVE_FG = "#123B70";
-const INACTIVE_FG = "rgba(255,255,255,0.72)";
+const ACTIVE_BG = "#FFF1E6";
+const ACTIVE_FG = "#EA580C";
+const INACTIVE_FG = "rgba(255,255,255,0.75)";
 
 /* Per-route presentation. `lucide` records the intended lucide icon so the
    swap is mechanical once that package is available. */

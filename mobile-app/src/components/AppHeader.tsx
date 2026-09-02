@@ -17,12 +17,14 @@ export interface AppHeaderProps {
   title: string;
   showBack?: boolean;
   showNotification?: boolean;
+  onBack?: () => void;
 }
 
 export function AppHeader({
   title,
   showBack = false,
   showNotification = true,
+  onBack,
 }: AppHeaderProps) {
   const colors = useTheme();
   const router = useRouter();
@@ -40,7 +42,7 @@ export function AppHeader({
         <View style={styles.leftContainer}>
           {showBack ? (
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => (onBack ? onBack() : router.back())}
               style={styles.iconButton}
             >
               <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
