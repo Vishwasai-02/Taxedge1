@@ -105,7 +105,7 @@ export const GstFilingPeriodStep: React.FC<GstFilingPeriodStepProps> = ({
         <Text style={styles.label}>GSTIN *</Text>
         <TextInput
           style={[styles.input, errors.gstin && styles.inputError]}
-          placeholder="29AKHIL1234K1Z5"
+          placeholder="29PAVAN1234K1Z5"
           placeholderTextColor="#94A3B8"
           value={data.gstin}
           onChangeText={(t) => onChange({ gstin: t.toUpperCase() })}
@@ -255,8 +255,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   periodPillActive: {
-    backgroundColor: "#059669",
-    borderColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
+    borderColor: BrandColors.PRIMARY_ORANGE,
   },
   periodPillText: {
     fontSize: 13,

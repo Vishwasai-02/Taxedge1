@@ -12,7 +12,7 @@ interface GstPaymentSuccessStepProps {
 }
 
 export const GstPaymentSuccessStep: React.FC<GstPaymentSuccessStepProps> = ({
-  amount = "₹5,900",
+  amount = "₹2,344",
   serviceName = "GST Registration",
   onViewReceipt,
   onViewApplication,
@@ -24,7 +24,7 @@ export const GstPaymentSuccessStep: React.FC<GstPaymentSuccessStepProps> = ({
       {/* Top Green Hero Card */}
       <View style={styles.heroCard}>
         <View style={styles.checkCircle}>
-          <Ionicons name="checkmark" size={32} color="#059669" />
+          <Ionicons name="checkmark" size={32} color={BrandColors.PRIMARY_ORANGE} />
         </View>
 
         <Text style={styles.heroTitle}>Payment Successful!</Text>
@@ -53,7 +53,7 @@ export const GstPaymentSuccessStep: React.FC<GstPaymentSuccessStepProps> = ({
 
         <View style={styles.row}>
           <Text style={styles.label}>Payment Method</Text>
-          <Text style={styles.value}>UPI — akhil@paytm</Text>
+          <Text style={styles.value}>UPI — pavan@ybl</Text>
         </View>
 
         <View style={styles.row}>
@@ -64,7 +64,7 @@ export const GstPaymentSuccessStep: React.FC<GstPaymentSuccessStepProps> = ({
         <View style={styles.row}>
           <Text style={styles.label}>Status</Text>
           <View style={styles.statusBadge}>
-            <Ionicons name="checkbox" size={14} color="#059669" />
+            <Ionicons name="checkbox" size={14} color={BrandColors.PRIMARY_ORANGE} />
             <Text style={styles.statusText}>Successful</Text>
           </View>
         </View>
@@ -77,7 +77,7 @@ export const GstPaymentSuccessStep: React.FC<GstPaymentSuccessStepProps> = ({
           activeOpacity={0.8}
           onPress={onViewReceipt}
         >
-          <Ionicons name="download-outline" size={16} color="#059669" />
+          <Ionicons name="download-outline" size={16} color={BrandColors.PRIMARY_ORANGE} />
           <Text style={styles.receiptBtnText}>View Receipt</Text>
         </TouchableOpacity>
 
@@ -104,16 +104,18 @@ export const GstPaymentSuccessStep: React.FC<GstPaymentSuccessStepProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     paddingTop: 4,
-    paddingBottom: 24,
+    paddingBottom: 16,
+    justifyContent: "space-between",
   },
   heroCard: {
-    backgroundColor: "#065F46", // Rich emerald green backdrop
+    backgroundColor: BrandColors.PRIMARY_BLUE,
     borderRadius: 24,
-    paddingVertical: 24,
+    paddingVertical: 26,
     paddingHorizontal: 20,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 14,
   },
   checkCircle: {
     width: 60,
@@ -208,7 +210,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   actionsRow: {
@@ -222,7 +224,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#059669",
+    borderColor: BrandColors.PRIMARY_ORANGE,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -231,19 +233,19 @@ const styles = StyleSheet.create({
   receiptBtnText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   applicationBtn: {
     flex: 1,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#059669",
+    shadowColor: BrandColors.PRIMARY_ORANGE,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 3,
   },
