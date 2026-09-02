@@ -1,20 +1,87 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Platform,
+  Image,
   Alert,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BrandColors } from "../../../shared/theme";
+import { pickImageFromGallery, pickImageFromCamera } from "../utils/imageUploadHelper";
+
+interface UploadedDoc {
+  id: string;
+  name: string;
+  size: string;
+  uri?: string;
+  status: "Uploaded" | "Under Review";
+}
+
+const DEFAULT_DOCS: UploadedDoc[] = [
+  { id: "1", name: "PAN_Card.pdf", size: "2.4 MB", status: "Uploaded" },
+  { id: "2", name: "Business_Proof.pdf", size: "3.1 MB", status: "Under Review" },
+];
 
 export const GstDocumentUploadStep: React.FC = () => {
+  const [documents, setDocuments] = useState<UploadedDoc[]>(DEFAULT_DOCS);
+
+  const handleUploadFromGallery = async () => {
+    const uri = await pickImageFromGallery();
+    if (uri) {
+      const newDoc: UploadedDoc = {
+        id: Date.now().toString(),
+        name: `Document_${documents.length + 1}.jpg`,
+        size: "1.8 MB",
+        uri,
+        status: "Uploaded",
+      };
+      setDocuments((prev) => [newDoc, ...prev]);
+    }
+  };
+
+  const handleUploadFromCamera = async () => {
+    const uri = await pickImageFromCamera();
+    if (uri) {
+      const newDoc: UploadedDoc = {
+        id: Date.now().toString(),
+        name: `Scanned_Doc_${documents.length + 1}.jpg`,
+        size: "2.1 MB",
+        uri,
+        status: "Uploaded",
+      };
+      setDocuments((prev) => [newDoc, ...prev]);
+    }
+  };
+
+  const handleUploadBoxPress = () => {
+    Alert.alert("Upload Document", "Choose source to select and crop image:", [
+      { text: "Browse Gallery", onPress: handleUploadFromGallery },
+      { text: "Scan with Camera", onPress: handleUploadFromCamera },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const handleRemoveDoc = (id: string) => {
+    Alert.alert("Remove Document", "Are you sure you want to remove this document?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => setDocuments((prev) => prev.filter((d) => d.id !== id)),
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Dashed Upload Drop Zone */}
-      <View style={styles.uploadZone}>
+      {/* Upload Zone */}
+      <TouchableOpacity
+        style={styles.uploadZone}
+        activeOpacity={0.75}
+        onPress={handleUploadBoxPress}
+      >
         <View style={styles.uploadIconBox}>
           <Ionicons name="arrow-up-outline" size={24} color="#FFFFFF" />
         </View>
@@ -22,14 +89,14 @@ export const GstDocumentUploadStep: React.FC = () => {
         <Text style={styles.uploadSubtitle}>
           PDF, JPG, PNG, Excel or Word{"\n"}Max file size: 10 MB per document
         </Text>
-      </View>
+      </TouchableOpacity>
 
-      {/* Action Buttons: Browse / Scan */}
+      {/* Action Buttons: Browse Files & Scan Document */}
       <View style={styles.actionsRow}>
         <TouchableOpacity
           style={styles.actionBtn}
           activeOpacity={0.8}
-          onPress={() => Alert.alert("Browse Files", "Select document to upload.")}
+          onPress={handleUploadFromGallery}
         >
           <Ionicons name="folder" size={18} color="#F59E0B" />
           <Text style={styles.actionBtnText}>Browse Files</Text>
@@ -38,7 +105,7 @@ export const GstDocumentUploadStep: React.FC = () => {
         <TouchableOpacity
           style={styles.actionBtn}
           activeOpacity={0.8}
-          onPress={() => Alert.alert("Scan Document", "Camera scanner initiated.")}
+          onPress={handleUploadFromCamera}
         >
           <Ionicons name="camera" size={18} color="#64748B" />
           <Text style={styles.actionBtnText}>Scan Document</Text>
@@ -48,48 +115,49 @@ export const GstDocumentUploadStep: React.FC = () => {
       {/* Uploaded Documents List */}
       <Text style={styles.sectionTitle}>Uploaded Documents</Text>
       <View style={styles.uploadedList}>
-        {/* Document 1: PAN_Card.pdf */}
-        <View style={styles.docCard}>
-          <View style={styles.docRow}>
-            <View style={styles.docIconBox}>
-              <Ionicons name="document-text" size={20} color="#94A3B8" />
-            </View>
-            <View style={styles.docInfo}>
-              <Text style={styles.docName}>PAN_Card.pdf</Text>
-              <Text style={styles.docSize}>2.4 MB</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: "#EFF6FF" }]}>
-              <Text style={[styles.badgeText, { color: "#2563EB" }]}>● Uploaded</Text>
-            </View>
-          </View>
-          <View style={styles.fileProgressBar}>
-            <View style={[styles.fileProgressFill, { width: "100%" }]} />
-          </View>
-        </View>
+        {documents.map((doc) => (
+          <View key={doc.id} style={styles.docCard}>
+            <View style={styles.docRow}>
+              {doc.uri ? (
+                <Image source={{ uri: doc.uri }} style={styles.docThumbnail} />
+              ) : (
+                <View style={styles.docIconBox}>
+                  <Ionicons name="document-text" size={20} color="#94A3B8" />
+                </View>
+              )}
 
-        {/* Document 2: Business_Proof.pdf */}
-        <View style={styles.docCard}>
-          <View style={styles.docRow}>
-            <View style={styles.docIconBox}>
-              <Ionicons name="document-text" size={20} color="#94A3B8" />
+              <View style={styles.docInfo}>
+                <Text style={styles.docName} numberOfLines={1}>
+                  {doc.name}
+                </Text>
+                <Text style={styles.docSize}>{doc.size}</Text>
+              </View>
+
+              <View style={[styles.badge, doc.status === "Uploaded" ? styles.badgeUploaded : styles.badgeReview]}>
+                <Text style={[styles.badgeText, doc.status === "Uploaded" ? styles.badgeTextUploaded : styles.badgeTextReview]}>
+                  ● {doc.status}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.removeBtn}
+                onPress={() => handleRemoveDoc(doc.id)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+              </TouchableOpacity>
             </View>
-            <View style={styles.docInfo}>
-              <Text style={styles.docName}>Business_Proof.pdf</Text>
-              <Text style={styles.docSize}>3.1 MB</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: "#F5F3FF" }]}>
-              <Text style={[styles.badgeText, { color: "#7C3AED" }]}>● Under Review</Text>
+
+            <View style={styles.fileProgressBar}>
+              <View style={[styles.fileProgressFill, { width: doc.status === "Uploaded" ? "100%" : "80%" }]} />
             </View>
           </View>
-          <View style={styles.fileProgressBar}>
-            <View style={[styles.fileProgressFill, { width: "80%" }]} />
-          </View>
-        </View>
+        ))}
       </View>
 
       {/* Warning Callout Box */}
       <View style={styles.warningBox}>
-        <Ionicons name="alert-circle-outline" size={18} color="#D97706" />
+        <Ionicons name="alert-circle-outline" size={18} color={BrandColors.PRIMARY_ORANGE} />
         <Text style={styles.warningText}>
           Ensure all documents are clear, readable and not expired. Blurry or cropped documents may cause delays.
         </Text>
@@ -100,71 +168,67 @@ export const GstDocumentUploadStep: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 8,
+    paddingTop: 4,
+    paddingBottom: 24,
   },
   uploadZone: {
-    borderWidth: 1.5,
-    borderColor: "#10B981",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#CBD5E1",
     borderStyle: "dashed",
-    borderRadius: 16,
-    backgroundColor: "#F0FDF4",
-    paddingVertical: 22,
-    paddingHorizontal: 16,
+    paddingVertical: 26,
     alignItems: "center",
-    marginBottom: 14,
+    marginBottom: 16,
   },
   uploadIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "#059669",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   uploadTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: BrandColors.TEXT_PRIMARY,
     marginBottom: 4,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   uploadSubtitle: {
     fontSize: 12,
     color: "#64748B",
     textAlign: "center",
-    lineHeight: 16,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
+    lineHeight: 18,
   },
   actionsRow: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 18,
+    gap: 12,
+    marginBottom: 20,
   },
   actionBtn: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
     height: 46,
+    borderRadius: 14,
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E2E8F0",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
   },
   actionBtnText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: "600",
     color: BrandColors.TEXT_PRIMARY,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   sectionTitle: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: "700",
     color: BrandColors.TEXT_PRIMARY,
-    marginBottom: 10,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
+    marginBottom: 12,
   },
   uploadedList: {
     gap: 10,
@@ -172,7 +236,7 @@ const styles = StyleSheet.create({
   },
   docCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1,
     borderColor: "#EEF2F6",
@@ -180,69 +244,87 @@ const styles = StyleSheet.create({
   docRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 10,
   },
   docIconBox: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#F1F5F9",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 10,
+  },
+  docThumbnail: {
+    width: 38,
+    height: 38,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: "#F1F5F9",
   },
   docInfo: {
     flex: 1,
   },
   docName: {
-    fontSize: 13.5,
-    fontWeight: "600",
+    fontSize: 13,
+    fontWeight: "700",
     color: BrandColors.TEXT_PRIMARY,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   docSize: {
-    fontSize: 11.5,
+    fontSize: 11,
     color: "#64748B",
     marginTop: 2,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  badgeUploaded: {
+    backgroundColor: "#EFF6FF",
+  },
+  badgeReview: {
+    backgroundColor: "#FEF0E6",
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: "700",
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
+  },
+  badgeTextUploaded: {
+    color: "#2563EB",
+  },
+  badgeTextReview: {
+    color: BrandColors.PRIMARY_ORANGE,
+  },
+  removeBtn: {
+    padding: 4,
   },
   fileProgressBar: {
     height: 4,
     backgroundColor: "#F1F5F9",
     borderRadius: 2,
-    marginTop: 10,
     overflow: "hidden",
   },
   fileProgressFill: {
     height: "100%",
-    backgroundColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     borderRadius: 2,
   },
   warningBox: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FEF9C3",
+    backgroundColor: "#FEF0E6",
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FEF08A",
-    gap: 10,
-    marginBottom: 10,
+    borderColor: "#FFD8BF",
+    gap: 8,
+    alignItems: "center",
   },
   warningText: {
     flex: 1,
     fontSize: 11.5,
-    color: "#854D0E",
+    color: "#9A3412",
     lineHeight: 16,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
 });

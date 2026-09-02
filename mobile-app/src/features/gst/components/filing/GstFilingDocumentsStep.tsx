@@ -1,7 +1,15 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BrandColors } from "../../../../shared/theme";
+import { pickImageFromGallery, pickImageFromCamera } from "../../utils/imageUploadHelper";
 
 export interface FilingDocItem {
   id: string;
@@ -10,72 +18,54 @@ export interface FilingDocItem {
   iconName: string;
   iconColor: string;
   iconBg: string;
+  uri?: string;
 }
 
-const FILING_DOCUMENTS: FilingDocItem[] = [
-  {
-    id: "sales",
-    name: "Sales Invoices (B2B)",
-    status: "Uploaded",
-    iconName: "document-text",
-    iconColor: "#2563EB",
-    iconBg: "#E0F2FE",
-  },
-  {
-    id: "purchase",
-    name: "Purchase Invoices",
-    status: "Uploaded",
-    iconName: "file-tray-full",
-    iconColor: "#0284C7",
-    iconBg: "#E0F2FE",
-  },
-  {
-    id: "expense",
-    name: "Expense Invoices",
-    status: "Pending",
-    iconName: "bar-chart",
-    iconColor: "#D97706",
-    iconBg: "#FEF3C7",
-  },
-  {
-    id: "credit",
-    name: "Credit Notes",
-    status: "Pending",
-    iconName: "card",
-    iconColor: "#0284C7",
-    iconBg: "#E0F2FE",
-  },
-  {
-    id: "debit",
-    name: "Debit Notes",
-    status: "Pending",
-    iconName: "clipboard",
-    iconColor: "#D97706",
-    iconBg: "#FEF3C7",
-  },
-  {
-    id: "bank",
-    name: "Bank Statement",
-    status: "Under Review",
-    iconName: "business",
-    iconColor: "#7C3AED",
-    iconBg: "#F3E8FF",
-  },
-  {
-    id: "prev-data",
-    name: "Previous GST Data",
-    status: "Approved",
-    iconName: "folder",
-    iconColor: "#F59E0B",
-    iconBg: "#FEF3C7",
-  },
+const INITIAL_DOCS: FilingDocItem[] = [
+  { id: "sales", name: "Sales Invoices (B2B)", status: "Uploaded", iconName: "document-text", iconColor: "#2563EB", iconBg: "#E0F2FE" },
+  { id: "purchase", name: "Purchase Invoices", status: "Uploaded", iconName: "file-tray-full", iconColor: "#0284C7", iconBg: "#E0F2FE" },
+  { id: "expense", name: "Expense Invoices", status: "Pending", iconName: "bar-chart", iconColor: "#D97706", iconBg: "#FEF3C7" },
+  { id: "credit", name: "Credit Notes", status: "Pending", iconName: "card", iconColor: "#0284C7", iconBg: "#E0F2FE" },
+  { id: "debit", name: "Debit Notes", status: "Pending", iconName: "clipboard", iconColor: "#D97706", iconBg: "#FEF3C7" },
+  { id: "bank", name: "Bank Statement", status: "Under Review", iconName: "business", iconColor: "#7C3AED", iconBg: "#F3E8FF" },
+  { id: "prev-data", name: "Previous GST Data", status: "Approved", iconName: "folder", iconColor: "#F59E0B", iconBg: "#FEF3C7" },
 ];
 
 export const GstFilingDocumentsStep: React.FC = () => {
-  const getBadge = (status: FilingDocItem["status"]) => {
+  const [documents, setDocuments] = useState<FilingDocItem[]>(INITIAL_DOCS);
+
+  const handleUploadDoc = (docId: string) => {
+    Alert.alert("Upload Document", "Choose source to upload and crop document:", [
+      {
+        text: "Gallery & Crop",
+        onPress: async () => {
+          const uri = await pickImageFromGallery();
+          if (uri) updateDocUri(docId, uri);
+        },
+      },
+      {
+        text: "Camera & Crop",
+        onPress: async () => {
+          const uri = await pickImageFromCamera();
+          if (uri) updateDocUri(docId, uri);
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const updateDocUri = (docId: string, uri: string) => {
+    setDocuments((prev) =>
+      prev.map((doc) =>
+        doc.id === docId ? { ...doc, status: "Uploaded", uri } : doc
+      )
+    );
+  };
+
+  const getBadgeStyle = (status: FilingDocItem["status"]) => {
     switch (status) {
       case "Approved":
-        return { bg: "#E6F7EF", text: "#059669", label: "● Approved" };
+        return { bg: "#FEF0E6", text: BrandColors.PRIMARY_ORANGE, label: "● Approved" };
       case "Uploaded":
         return { bg: "#EFF6FF", text: "#2563EB", label: "● Uploaded" };
       case "Under Review":
@@ -90,27 +80,37 @@ export const GstFilingDocumentsStep: React.FC = () => {
     <View style={styles.container}>
       {/* Top Advisory Banner */}
       <View style={styles.banner}>
-        <Text style={styles.bannerIcon}>📋</Text>
+        <Ionicons name="information-circle-outline" size={18} color="#083B75" />
         <Text style={styles.bannerText}>
-          Upload documents for <Text style={styles.boldText}>GSTR-3B — July 2026</Text>. Our CA will verify and prepare your return.
+          Upload documents for <Text style={styles.boldText}>GSTR-3B — July 2026</Text>. Tap any document to capture or select from gallery with automatic crop.
         </Text>
       </View>
 
       {/* Document Items */}
       <View style={styles.list}>
-        {FILING_DOCUMENTS.map((doc) => {
-          const badge = getBadge(doc.status);
-          const isPending = doc.status === "Pending";
-
+        {documents.map((doc) => {
+          const badge = getBadgeStyle(doc.status);
           return (
-            <View key={doc.id} style={styles.card}>
-              <View style={[styles.iconBox, { backgroundColor: doc.iconBg }]}>
-                <Ionicons name={doc.iconName as any} size={20} color={doc.iconColor} />
-              </View>
+            <TouchableOpacity
+              key={doc.id}
+              style={styles.card}
+              activeOpacity={0.75}
+              onPress={() => handleUploadDoc(doc.id)}
+            >
+              {doc.uri ? (
+                <Image source={{ uri: doc.uri }} style={styles.thumbnail} />
+              ) : (
+                <View style={[styles.iconBox, { backgroundColor: doc.iconBg }]}>
+                  <Ionicons name={doc.iconName as any} size={18} color={doc.iconColor} />
+                </View>
+              )}
 
-              <Text style={styles.docName} numberOfLines={1}>
-                {doc.name}
-              </Text>
+              <View style={styles.textCol}>
+                <Text style={styles.docName}>{doc.name}</Text>
+                <Text style={styles.docMeta}>
+                  {doc.uri ? "Cropped & Uploaded" : "Tap to upload image"}
+                </Text>
+              </View>
 
               <View style={[styles.badge, { backgroundColor: badge.bg }]}>
                 <Text style={[styles.badgeText, { color: badge.text }]}>
@@ -118,16 +118,8 @@ export const GstFilingDocumentsStep: React.FC = () => {
                 </Text>
               </View>
 
-              {isPending && (
-                <TouchableOpacity
-                  style={styles.uploadActionBtn}
-                  activeOpacity={0.7}
-                  onPress={() => Alert.alert("Upload Document", `Select files for ${doc.name}`)}
-                >
-                  <Ionicons name="arrow-up-outline" size={16} color="#059669" />
-                </TouchableOpacity>
-              )}
-            </View>
+              <Ionicons name="cloud-upload-outline" size={18} color={BrandColors.PRIMARY_ORANGE} />
+            </TouchableOpacity>
           );
         })}
       </View>
@@ -137,81 +129,77 @@ export const GstFilingDocumentsStep: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 8,
+    paddingTop: 4,
+    paddingBottom: 24,
   },
   banner: {
     flexDirection: "row",
-    backgroundColor: "#F0FDF4",
+    backgroundColor: "#EAF1FE",
     borderRadius: 14,
-    padding: 14,
+    padding: 12,
     borderWidth: 1,
-    borderColor: "#DCFCE7",
-    gap: 10,
+    borderColor: "#BFDBFE",
+    gap: 8,
     alignItems: "center",
     marginBottom: 16,
   },
-  bannerIcon: {
-    fontSize: 18,
-  },
   bannerText: {
     flex: 1,
-    fontSize: 12.5,
-    color: "#166534",
-    lineHeight: 18,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
+    fontSize: 12,
+    color: "#083B75",
+    lineHeight: 17,
   },
   boldText: {
     fontWeight: "700",
   },
   list: {
     gap: 10,
-    marginBottom: 10,
   },
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 12,
     borderWidth: 1,
     borderColor: "#EEF2F6",
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 10,
+  },
+  thumbnail: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    marginRight: 10,
+    backgroundColor: "#F1F5F9",
+  },
+  textCol: {
+    flex: 1,
   },
   docName: {
-    flex: 1,
     fontSize: 13.5,
-    fontWeight: "600",
+    fontWeight: "700",
     color: BrandColors.TEXT_PRIMARY,
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
+  },
+  docMeta: {
+    fontSize: 11,
+    color: "#64748B",
+    marginTop: 2,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    marginRight: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginRight: 8,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: "700",
-    fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
-  },
-  uploadActionBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: "#F0FDF4",
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 4,
   },
 });

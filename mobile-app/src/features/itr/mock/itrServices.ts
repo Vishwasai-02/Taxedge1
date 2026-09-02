@@ -13,7 +13,7 @@ export const ITR_SERVICES: ItrServiceItem[] = [
   },
   {
     id: "tds-refund",
-    title: "TDS Filing / TDS Refund",
+    title: "TDS Refund",
     description: "Claim your TDS refund and file TDS returns efficiently",
     iconName: "calculator",
     iconColor: BrandColors.PRIMARY_ORANGE,
@@ -27,7 +27,7 @@ export const ITR_SERVICES: ItrServiceItem[] = [
     iconName: "calendar",
     iconColor: BrandColors.PRIMARY_BLUE,
     iconBg: BrandColors.PRIMARY_LIGHT_BLUE,
-    route: "/service/itr-filing",
+    route: "/service/previous-year-itr",
   },
   {
     id: "revised-itr",
@@ -36,7 +36,7 @@ export const ITR_SERVICES: ItrServiceItem[] = [
     iconName: "create",
     iconColor: BrandColors.PRIMARY_ORANGE,
     iconBg: BrandColors.PRIMARY_LIGHT_ORANGE,
-    route: "/service/itr-filing",
+    route: "/service/revised-itr",
   },
   {
     id: "tax-notice-assistance",
@@ -45,6 +45,6 @@ export const ITR_SERVICES: ItrServiceItem[] = [
     iconName: "warning",
     iconColor: BrandColors.PRIMARY_BLUE,
     iconBg: BrandColors.PRIMARY_LIGHT_BLUE,
-    route: "/service/itr-filing",
+    route: "/service/tax-notice-assistance",
   },
 ];

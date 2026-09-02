@@ -281,8 +281,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   proofPillSelected: {
-    backgroundColor: "#E6F7EF",
-    borderColor: "#10B981",
+    backgroundColor: "#FEF0E6",
+    borderColor: BrandColors.PRIMARY_ORANGE,
   },
   proofPillText: {
     fontSize: 12.5,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
   proofPillTextSelected: {
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontWeight: "700",
   },
   modalOverlay: {

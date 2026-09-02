@@ -148,20 +148,20 @@ export default function CreateProfileScreen() {
     setShowDatePicker(false);
   };
 
-  const handleCreateProfile = () => {
+  const handleCreateProfile = async () => {
     const errs: SignupErrors = {};
     if (!form.name.trim()) errs.name = "Full name is required";
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) errs.email = "Valid email is required";
     if (!form.customerType) errs.customerType = "Customer type is required";
     if (!form.password) {
-      errs.password = "Password is required";
-    } else if (form.password.length < 6) {
-      errs.password = "Password must be at least 6 characters";
+      errs.password = "6-digit passcode is required";
+    } else if (!/^\d{6}$/.test(form.password)) {
+      errs.password = "Passcode must be exactly 6 numeric digits";
     }
     if (!form.confirmPassword) {
-      errs.confirmPassword = "Confirm password is required";
+      errs.confirmPassword = "Confirm passcode is required";
     } else if (form.password !== form.confirmPassword) {
-      errs.confirmPassword = "Passwords do not match";
+      errs.confirmPassword = "Passcodes do not match";
     }
     if (!form.dob.trim()) errs.dob = "Date of birth is required";
     if (!form.pan.trim() || form.pan.length < 10) errs.pan = "Valid 10-digit PAN is required";
@@ -174,20 +174,32 @@ export default function CreateProfileScreen() {
     }
 
     setProfileLoading(true);
-    setTimeout(() => {
+    try {
+      const res = await register(
+        {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          customerType: form.customerType,
+          dob: form.dob.trim(),
+          pan: form.pan.trim().toUpperCase(),
+          aadhaar: form.aadhaar.trim(),
+          address: form.address.trim(),
+        },
+        form.password.trim(),
+        true
+      );
+
       setProfileLoading(false);
-      register({
-        name: form.name.trim(),
-        email: form.email.trim(),
-        customerType: form.customerType,
-        dob: form.dob.trim(),
-        pan: form.pan.trim().toUpperCase(),
-        aadhaar: form.aadhaar.trim(),
-        address: form.address.trim(),
-      });
-      if (avatarUri) setAvatar(avatarUri);
-      router.replace("/(main)/home");
-    }, 600);
+      if (res.success) {
+        if (avatarUri) setAvatar(avatarUri);
+        router.replace("/(main)/home" as any);
+      } else {
+        Alert.alert("Registration Error", res.error || "Failed to create account.");
+      }
+    } catch (err) {
+      setProfileLoading(false);
+      Alert.alert("Registration Error", "An unexpected error occurred.");
+    }
   };
 
   return (
@@ -381,24 +393,28 @@ export default function CreateProfileScreen() {
             error={profileErrors.address}
           />
 
-          {/* 8. Create Password */}
+          {/* 8. Create 6-Digit Passcode */}
           <Field
             leftIcon="lock-closed-outline"
             value={form.password}
-            onChangeText={(t) => updateForm("password", t)}
-            placeholder="Create Password (min 6 characters)"
+            onChangeText={(t) => updateForm("password", t.replace(/\D/g, "").slice(0, 6))}
+            placeholder="Create 6-Digit Passcode (numbers only)"
+            keyboardType="number-pad"
+            maxLength={6}
             secureTextEntry={!showPassword}
             rightIcon={showPassword ? "eye-off-outline" : "eye-outline"}
             onRightIconPress={() => setShowPassword((prev) => !prev)}
             error={profileErrors.password}
           />
 
-          {/* 9. Confirm Password */}
+          {/* 9. Confirm 6-Digit Passcode */}
           <Field
             leftIcon="lock-closed-outline"
             value={form.confirmPassword}
-            onChangeText={(t) => updateForm("confirmPassword", t)}
-            placeholder="Confirm Password"
+            onChangeText={(t) => updateForm("confirmPassword", t.replace(/\D/g, "").slice(0, 6))}
+            placeholder="Confirm 6-Digit Passcode"
+            keyboardType="number-pad"
+            maxLength={6}
             secureTextEntry={!showConfirmPassword}
             rightIcon={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
             onRightIconPress={() => setShowConfirmPassword((prev) => !prev)}
