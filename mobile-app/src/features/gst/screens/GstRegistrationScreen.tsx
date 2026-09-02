@@ -161,10 +161,7 @@ export const GstRegistrationScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <View style={styles.root}>
       {/* Top Header Bar */}
       <View style={[styles.headerBar, { paddingTop: Math.max(insets.top, 12) + 6 }]}>
         <TouchableOpacity
@@ -188,12 +185,16 @@ export const GstRegistrationScreen: React.FC = () => {
 
       {/* Main Scroll Content */}
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + (screenIndex < 5 ? 90 : 30) },
+          screenIndex === 5 && { paddingBottom: 24 },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={true}
+        overScrollMode="always"
+        nestedScrollEnabled={true}
       >
         {screenIndex === 0 && (
           <GstPersonalStep
@@ -244,21 +245,21 @@ export const GstRegistrationScreen: React.FC = () => {
         )}
 
         {screenIndex === 5 && <GstApplicationStatusStep />}
-      </ScrollView>
 
-      {/* Sticky Bottom Action Button */}
-      {screenIndex < 5 && (
-        <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={handleContinue}
-            style={styles.submitBtn}
-          >
-            <Text style={styles.submitBtnText}>{getButtonText()}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </KeyboardAvoidingView>
+        {/* Action Button - In scroll view so it stays at the bottom and never floats over inputs */}
+        {screenIndex < 5 && (
+          <View style={styles.buttonWrapper}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={handleContinue}
+              style={styles.submitBtn}
+            >
+              <Text style={styles.submitBtnText}>{getButtonText()}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -294,30 +295,27 @@ const styles = StyleSheet.create({
   placeholderBox: {
     width: 38,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 18,
     flexGrow: 1,
+    paddingBottom: 260,
   },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+  buttonWrapper: {
+    marginTop: 22,
+    marginBottom: 8,
   },
   submitBtn: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: BrandColors.PRIMARY_BLUE,
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: BrandColors.PRIMARY_BLUE,
+    shadowColor: BrandColors.PRIMARY_ORANGE,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
   },

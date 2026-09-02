@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, Text } from "react-native";
 import Animated, {
   LinearTransition,
   useAnimatedStyle,
@@ -16,41 +16,19 @@ import type {
 
 import type { IconName } from "../types/domain";
 
-/**
- * Floating glass tab bar.
- *
- * Passed to expo-router's <Tabs tabBar={...}> so it REPLACES the default bar
- * rather than adding a second navigation system - routing, state and history
- * all still come from React Navigation via the `state` / `navigation` props.
- *
- * Icons only - no text is drawn. The active tab is marked by a white capsule
- * that springs across as the route changes; each tab's name is exposed to
- * screen readers through accessibilityLabel instead.
- *
- * Layout is entirely flex-based: every tab is `flex: 1`, so the row divides the
- * bar evenly whatever the tab count and nothing can overflow on a narrow device.
- *
- * NOTE: swapping in lucide-react-native is a mechanical change - replace
- * <Ionicons .../> in TabItem with the lucide icon named in TAB_META.lucide.
- */
-
-export const FLOATING_TAB_HEIGHT = 64;
+export const FLOATING_TAB_HEIGHT = 68;
 export const FLOATING_TAB_GAP = 12;
 
 const ACTIVE_BG = "rgba(255,255,255,0.97)";
 const ACTIVE_FG = "#123B70";
 const INACTIVE_FG = "rgba(255,255,255,0.72)";
 
-/* Per-route presentation. `lucide` records the intended lucide icon so the
-   swap is mechanical once that package is available. */
-/* Routes that exist but are not tabs. */
 const HIDDEN_FROM_BAR = new Set(["gst"]);
 
 export interface TabMeta {
   label?: string;
   icon: IconName;
   iconOutline: IconName;
-  /** Intended lucide icon, recorded so the swap stays mechanical. */
   lucide?: string;
 }
 
@@ -59,9 +37,6 @@ const FALLBACK_META: TabMeta = {
   iconOutline: "ellipse-outline",
 };
 
-/* A folder route may register as "gst" or "gst/index" depending on how it is
-   declared, so try both spellings before falling back to a generic icon.
-   A tab is never dropped for a missing entry - that is how GST Index vanished. */
 function metaFor(routeName: string): TabMeta {
   return (
     TAB_META[routeName] ??
@@ -75,7 +50,7 @@ const TAB_META: Record<string, TabMeta> = {
   home: { label: "Home", icon: "home", iconOutline: "home-outline", lucide: "House" },
   applications: { label: "Applications", icon: "grid", iconOutline: "grid-outline", lucide: "LayoutGrid" },
   documents: { label: "Documents", icon: "document-text", iconOutline: "document-text-outline", lucide: "FileText" },
-  payments: { label: "Payments", icon: "card", iconOutline: "card-outline", lucide: "CreditCard" },
+  payments: { label: "Payment", icon: "card", iconOutline: "card-outline", lucide: "CreditCard" },
   profile: { label: "Profile", icon: "person", iconOutline: "person-outline", lucide: "User" },
   gst: { label: "GST Index", icon: "book", iconOutline: "book-outline", lucide: "BookOpen" },
 };
@@ -128,11 +103,21 @@ function TabItem({
     >
       <Ionicons
         name={isFocused ? meta.icon : meta.iconOutline}
-        size={21}
+        size={19}
         color={isFocused ? ACTIVE_FG : INACTIVE_FG}
       />
-
-      {/* Icons only - the label is carried by accessibilityLabel, not drawn. */}
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.tabLabel,
+          {
+            color: isFocused ? ACTIVE_FG : INACTIVE_FG,
+            fontWeight: isFocused ? "700" : "500",
+          },
+        ]}
+      >
+        {label}
+      </Text>
     </AnimatedPressable>
   );
 }
@@ -153,16 +138,12 @@ export function FloatingTabBar({
         <View style={styles.sheen} pointerEvents="none" />
 
         {state.routes.map((route, index) => {
-          // `href` is an expo-router addition on top of the navigator options.
           const options = descriptors[route.key].options as
             BottomTabNavigationOptions & { href?: Href | null };
-          // Skip routes expo-router has hidden, and the GST index, which is
-          // reachable from the Quick Services tiles instead.
           if (options.href === null) return null;
           if (HIDDEN_FROM_BAR.has(route.name.split("/")[0])) return null;
 
           const meta = metaFor(route.name);
-
           const isFocused = state.index === index;
           const label = meta.label ?? options.title ?? route.name;
 
@@ -217,7 +198,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
 
     // Glass: translucent navy + hairline highlight.
-    backgroundColor: "rgba(9,38,72,0.72)",
+    backgroundColor: "rgba(9,38,72,0.85)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.24)",
 
@@ -236,23 +217,30 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.22)",
   },
 
-  /* Inactive tabs divide the leftover space, so the row always fits. */
   tabInactive: {
     flex: 1,
     minWidth: 0,
-    height: 46,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 2,
   },
 
-  /* The active capsule sizes to its content and shrinks before it overflows. */
   tabActive: {
     flex: 1,
     minWidth: 0,
-    height: 46,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 23,
+    paddingVertical: 2,
+    borderRadius: 20,
     backgroundColor: ACTIVE_BG,
+  },
+
+  tabLabel: {
+    fontSize: 9.5,
+    marginTop: 2,
+    textAlign: "center",
+    letterSpacing: -0.2,
   },
 });

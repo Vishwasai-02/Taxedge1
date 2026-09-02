@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
   progressCount: {
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontWeight: "700",
   },
   progressBar: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   progressFill: {
     width: "45%",
     height: "100%",
-    backgroundColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     borderRadius: 3,
   },
   list: {

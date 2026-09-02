@@ -446,6 +446,10 @@ export default function HomeScreen() {
             ))}
           </View>
         </View>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Financial Overview</Text>
+
+        </View>
 
         {/* ---------- Stats grid ---------- */}
         <View style={styles.statsGrid}>

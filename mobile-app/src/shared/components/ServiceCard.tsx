@@ -246,13 +246,13 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   badgePill: {
-    backgroundColor: "#E6F7EF",
+    backgroundColor: "#FEF0E6",
     paddingHorizontal: 11,
     paddingVertical: 4,
     borderRadius: 12,
   },
   badgeText: {
-    color: "#10B981",
+    color: BrandColors.PRIMARY_ORANGE,
     fontSize: 11,
     fontWeight: "700",
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
