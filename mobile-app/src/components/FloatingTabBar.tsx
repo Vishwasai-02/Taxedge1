@@ -1,7 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -16,52 +15,29 @@ import type {
 
 import type { IconName } from "../types/domain";
 
-/**
- * Floating glass tab bar.
- *
- * Passed to expo-router's <Tabs tabBar={...}> so it REPLACES the default bar
- * rather than adding a second navigation system - routing, state and history
- * all still come from React Navigation via the `state` / `navigation` props.
- *
- * Icons only - no text is drawn. The active tab is marked by a white capsule
- * that springs across as the route changes; each tab's name is exposed to
- * screen readers through accessibilityLabel instead.
- *
- * Layout is entirely flex-based: every tab is `flex: 1`, so the row divides the
- * bar evenly whatever the tab count and nothing can overflow on a narrow device.
- *
- * NOTE: swapping in lucide-react-native is a mechanical change - replace
- * <Ionicons .../> in TabItem with the lucide icon named in TAB_META.lucide.
- */
-
-export const FLOATING_TAB_HEIGHT = 64;
+export const FLOATING_TAB_HEIGHT = 60;
 export const FLOATING_TAB_GAP = 12;
 
-const ACTIVE_BG = "rgba(255,255,255,0.97)";
-const ACTIVE_FG = "#123B70";
-const INACTIVE_FG = "rgba(255,255,255,0.72)";
+const BAR_BG = "#1E3A5F"; // Royal Navy Blue capsule background
+const ACTIVE_PILL_BG = "#FFFFFF"; // Clean white active pill
+const ACTIVE_ICON_COLOR = "#FF5722"; // Vibrant Orange icon when clicked/active
+const INACTIVE_ICON_COLOR = "#FFFFFF"; // Crisp white icon on blue background
 
-/* Per-route presentation. `lucide` records the intended lucide icon so the
-   swap is mechanical once that package is available. */
-/* Routes that exist but are not tabs. */
+/* Per-route presentation. */
 const HIDDEN_FROM_BAR = new Set(["gst"]);
 
 export interface TabMeta {
-  label?: string;
+  label: string;
   icon: IconName;
   iconOutline: IconName;
-  /** Intended lucide icon, recorded so the swap stays mechanical. */
-  lucide?: string;
 }
 
 const FALLBACK_META: TabMeta = {
+  label: "Tab",
   icon: "ellipse",
   iconOutline: "ellipse-outline",
 };
 
-/* A folder route may register as "gst" or "gst/index" depending on how it is
-   declared, so try both spellings before falling back to a generic icon.
-   A tab is never dropped for a missing entry - that is how GST Index vanished. */
 function metaFor(routeName: string): TabMeta {
   return (
     TAB_META[routeName] ??
@@ -72,17 +48,15 @@ function metaFor(routeName: string): TabMeta {
 }
 
 const TAB_META: Record<string, TabMeta> = {
-  home: { label: "Home", icon: "home", iconOutline: "home-outline", lucide: "House" },
-  applications: { label: "Applications", icon: "grid", iconOutline: "grid-outline", lucide: "LayoutGrid" },
-  documents: { label: "Documents", icon: "document-text", iconOutline: "document-text-outline", lucide: "FileText" },
-  payments: { label: "Payments", icon: "card", iconOutline: "card-outline", lucide: "CreditCard" },
-  profile: { label: "Profile", icon: "person", iconOutline: "person-outline", lucide: "User" },
-  gst: { label: "GST Index", icon: "book", iconOutline: "book-outline", lucide: "BookOpen" },
+  home: { label: "Home", icon: "home", iconOutline: "home-outline" },
+  applications: { label: "Applications", icon: "grid", iconOutline: "grid-outline" },
+  documents: { label: "Documents", icon: "document-text", iconOutline: "document-text-outline" },
+  payments: { label: "Payments", icon: "card", iconOutline: "card-outline" },
+  profile: { label: "Profile", icon: "person", iconOutline: "person-outline" },
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-const SPRING = { damping: 18, stiffness: 190, mass: 0.7 };
+const SPRING = { damping: 18, stiffness: 200, mass: 0.6 };
 
 type TabRoute = BottomTabBarProps["state"]["routes"][number];
 
@@ -106,7 +80,7 @@ function TabItem({
   const pressed = useSharedValue(0);
 
   const pressStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(1 - pressed.value * 0.1, SPRING) }],
+    transform: [{ scale: withSpring(1 - pressed.value * 0.08, SPRING) }],
   }));
 
   return (
@@ -123,16 +97,25 @@ function TabItem({
       onPressOut={() => {
         pressed.value = 0;
       }}
-      layout={LinearTransition.springify().damping(20).stiffness(180)}
-      style={[isFocused ? styles.tabActive : styles.tabInactive, pressStyle]}
+      style={[styles.tabItem, pressStyle]}
     >
-      <Ionicons
-        name={isFocused ? meta.icon : meta.iconOutline}
-        size={21}
-        color={isFocused ? ACTIVE_FG : INACTIVE_FG}
-      />
-
-      {/* Icons only - the label is carried by accessibilityLabel, not drawn. */}
+      {isFocused ? (
+        <View style={styles.activePill}>
+          <Ionicons
+            name={meta.icon}
+            size={23}
+            color={ACTIVE_ICON_COLOR}
+          />
+        </View>
+      ) : (
+        <View style={styles.inactivePill}>
+          <Ionicons
+            name={meta.iconOutline}
+            size={23}
+            color={INACTIVE_ICON_COLOR}
+          />
+        </View>
+      )}
     </AnimatedPressable>
   );
 }
@@ -146,23 +129,23 @@ export function FloatingTabBar({
 
   return (
     <View
+      style={[
+        styles.floatingWrapper,
+        {
+          bottom: Math.max(insets.bottom, 10),
+        },
+      ]}
       pointerEvents="box-none"
-      style={[styles.wrap, { bottom: Math.max(insets.bottom, 10) + FLOATING_TAB_GAP }]}
     >
-      <View style={styles.bar}>
-        <View style={styles.sheen} pointerEvents="none" />
-
+      <View style={styles.capsuleContainer}>
         {state.routes.map((route, index) => {
-          // `href` is an expo-router addition on top of the navigator options.
           const options = descriptors[route.key].options as
             BottomTabNavigationOptions & { href?: Href | null };
-          // Skip routes expo-router has hidden, and the GST index, which is
-          // reachable from the Quick Services tiles instead.
+
           if (options.href === null) return null;
           if (HIDDEN_FROM_BAR.has(route.name.split("/")[0])) return null;
 
           const meta = metaFor(route.name);
-
           const isFocused = state.index === index;
           const label = meta.label ?? options.title ?? route.name;
 
@@ -200,59 +183,54 @@ export function FloatingTabBar({
 }
 
 const styles = StyleSheet.create({
-  wrap: {
+  floatingWrapper: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    paddingHorizontal: 12,
+    left: 12,
+    right: 12,
     zIndex: 100,
-    elevation: 100,
+    elevation: 20,
+    alignItems: "center",
   },
-  bar: {
+  capsuleContainer: {
+    width: "100%",
+    height: FLOATING_TAB_HEIGHT,
+    backgroundColor: BAR_BG,
+    borderRadius: 30,
     flexDirection: "row",
     alignItems: "center",
-    height: FLOATING_TAB_HEIGHT,
-    paddingHorizontal: 6,
-    borderRadius: FLOATING_TAB_HEIGHT / 2,
-    overflow: "hidden",
-
-    // Glass: translucent navy + hairline highlight.
-    backgroundColor: "rgba(9,38,72,0.72)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.24)",
-
-    shadowColor: "#04203F",
-    shadowOffset: { width: 0, height: 10 },
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    shadowColor: "#0A192F",
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
-    shadowRadius: 20,
+    shadowRadius: 10,
     elevation: 14,
   },
-  sheen: {
-    position: "absolute",
-    top: 0,
-    left: 24,
-    right: 24,
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.22)",
-  },
-
-  /* Inactive tabs divide the leftover space, so the row always fits. */
-  tabInactive: {
+  tabItem: {
     flex: 1,
-    minWidth: 0,
-    height: 46,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
-
-  /* The active capsule sizes to its content and shrinks before it overflows. */
-  tabActive: {
-    flex: 1,
-    minWidth: 0,
-    height: 46,
+  activePill: {
+    backgroundColor: ACTIVE_PILL_BG,
+    width: "92%",
+    maxWidth: 62,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 23,
-    backgroundColor: ACTIVE_BG,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  inactivePill: {
+    width: "100%",
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
