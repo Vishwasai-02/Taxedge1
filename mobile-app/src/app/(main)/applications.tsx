@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
 } from "react-native";
@@ -12,6 +11,7 @@ import { useApplicationStore } from "../../store/applicationStore";
 import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./applications.styles";
 
 export default function ApplicationsScreen() {
   const colors = useTheme();
@@ -214,142 +214,3 @@ export default function ApplicationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  tabBar: {
-    flexDirection: "row",
-    height: 48,
-    borderBottomWidth: 1.5,
-  },
-  tabItem: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderBottomWidth: 3,
-    borderBottomColor: "transparent",
-  },
-  tabLabel: {
-    fontSize: 14,
-  },
-  listContent: {
-    padding: 16,
-    gap: 14,
-    paddingBottom: 32,
-  },
-  appCard: {
-    borderRadius: 14,
-    borderWidth: 1.5,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  titleInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  appName: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  appId: {
-    fontSize: 12,
-    marginTop: 2,
-    fontWeight: "500",
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  progressRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 16,
-    gap: 12,
-  },
-  progressBarBg: {
-    flex: 1,
-    height: 6,
-    backgroundColor: "#00000008",
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressBarFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 12,
-    fontWeight: "700",
-    width: 32,
-    textAlign: "right",
-  },
-  cardDivider: {
-    height: 1,
-    backgroundColor: "#00000005",
-    marginVertical: 14,
-  },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  footerDetail: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  footerDetailText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  paymentBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#FFEBEE",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  paymentBadgeText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  arrowContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-  },
-  trackText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  emptySub: {
-    fontSize: 13,
-    marginTop: 6,
-  },
-});

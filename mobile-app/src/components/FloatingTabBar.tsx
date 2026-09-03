@@ -138,10 +138,19 @@ export function FloatingTabBar({
         <View style={styles.sheen} pointerEvents="none" />
 
         {state.routes.map((route, index) => {
+          // Skip routes with null href, hidden routes, and any style files or undeclared routes
+          if (
+            route.name.includes("styles") ||
+            route.name.endsWith(".styles") ||
+            HIDDEN_FROM_BAR.has(route.name.split("/")[0]) ||
+            (!TAB_META[route.name] && !TAB_META[route.name.split("/")[0]])
+          ) {
+            return null;
+          }
+
           const options = descriptors[route.key].options as
             BottomTabNavigationOptions & { href?: Href | null };
           if (options.href === null) return null;
-          if (HIDDEN_FROM_BAR.has(route.name.split("/")[0])) return null;
 
           const meta = metaFor(route.name);
           const isFocused = state.index === index;
@@ -190,8 +199,10 @@ const styles = StyleSheet.create({
     elevation: 100,
   },
   bar: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     height: FLOATING_TAB_HEIGHT,
     paddingHorizontal: 6,
     borderRadius: FLOATING_TAB_HEIGHT / 2,
@@ -224,6 +235,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 2,
+    paddingHorizontal: 2,
   },
 
   tabActive: {
@@ -233,12 +245,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 2,
+    paddingHorizontal: 2,
     borderRadius: 20,
     backgroundColor: ACTIVE_BG,
   },
 
   tabLabel: {
-    fontSize: 9.5,
+    fontSize: 10,
     marginTop: 2,
     textAlign: "center",
     letterSpacing: -0.2,

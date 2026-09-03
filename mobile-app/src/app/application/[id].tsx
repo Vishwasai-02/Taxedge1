@@ -2,19 +2,20 @@ import React from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "../../hooks/use-theme";
+import { Spacing } from "../../shared/theme";
 import { useApplicationStore } from "../../store/applicationStore";
 import { AppHeader } from "../../components/AppHeader";
 import { StatusTimeline } from "../../components/StatusTimeline";
 import { DocumentChecklist } from "../../components/DocumentChecklist";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { styles } from "./[id].styles";
 
 export default function ApplicationDetailScreen() {
   const colors = useTheme();
@@ -54,7 +55,7 @@ export default function ApplicationDetailScreen() {
       <AppHeader title={app.serviceName} showBack />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xl }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Summary Card */}
@@ -231,162 +232,3 @@ export default function ApplicationDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 32,
-  },
-  card: {
-    borderRadius: 16,
-    borderWidth: 1.5,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  summaryHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  appIdText: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  appIdVal: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#00000005",
-    marginVertical: 16,
-  },
-  repRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  repInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  repLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-  },
-  repName: {
-    fontSize: 15,
-    fontWeight: "700",
-    marginTop: 2,
-  },
-  chatBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  chatBtnText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  paymentCard: {
-    borderRadius: 16,
-    borderWidth: 1.5,
-    padding: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  paymentInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  paymentDueTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  paymentDueAmt: {
-    fontSize: 18,
-    fontWeight: "800",
-    marginTop: 2,
-  },
-  payNowBtn: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  payNowText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-  checklistHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  checklistProgressText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  formSummaryList: {
-    gap: 12,
-  },
-  summaryItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#00000003",
-  },
-  summaryKey: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  summaryVal: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  errorContainer: {
-    flex: 1,
-  },
-  errorContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  errorText: {
-    fontSize: 15,
-    fontWeight: "600",
-    marginTop: 12,
-  },
-});

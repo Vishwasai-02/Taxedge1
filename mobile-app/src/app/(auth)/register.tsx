@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,8 +16,10 @@ import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../../hooks/use-theme";
+import { BrandColors } from "../../shared/theme";
 import { useAuthStore } from "../../store/authStore";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { styles } from "./register.styles";
 import type {
   IconName,
   ProfileFormErrors,
@@ -252,7 +253,7 @@ function Field({
         style={[
           styles.inputBox,
           {
-            borderColor: error ? colors.error : "#D1E7DD",
+            borderColor: error ? colors.error : BrandColors.BORDER,
             backgroundColor: colors.backgroundElement,
           },
         ]}
@@ -262,11 +263,11 @@ function Field({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={BrandColors.TEXT_MUTED}
           {...props}
         />
         {rightIcon && (
-          <Ionicons name={rightIcon} size={18} color="#64748B" style={styles.rightIcon} />
+          <Ionicons name={rightIcon} size={18} color={BrandColors.TEXT_SECONDARY} style={styles.rightIcon} />
         )}
       </View>
       {error ? <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text> : null}
@@ -274,109 +275,3 @@ function Field({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    borderWidth: 1.2,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-    marginBottom: 20,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    letterSpacing: -0.3,
-  },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  avatarSection: {
-    alignItems: "center",
-    marginVertical: 18,
-  },
-  avatarWrap: {
-    position: "relative",
-  },
-  avatarCircle: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    borderWidth: 2,
-    borderColor: "#10B981",
-    backgroundColor: "#D1FAE5",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-  },
-  cameraBadge: {
-    position: "absolute",
-    right: -2,
-    bottom: 0,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#065F46",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  form: {
-    gap: 4,
-  },
-  fieldContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  inputBox: {
-    height: 52,
-    borderWidth: 1.5,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    height: "100%",
-  },
-  rightIcon: {
-    marginLeft: 8,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: "500",
-  },
-  submitBtn: {
-    marginTop: 12,
-  },
-});
