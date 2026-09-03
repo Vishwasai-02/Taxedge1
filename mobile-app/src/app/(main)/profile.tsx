@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -12,23 +11,226 @@ import {
   type AlertButton,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 import { useTheme } from "../../hooks/use-theme";
 import { useAuthStore } from "../../store/authStore";
+import { useApplicationStore } from "../../store/applicationStore";
+
 import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
+import { styles } from "./profile.styles";
+ 
 import { SecondaryButton } from "../../components/SecondaryButton";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { IconName } from "../../types/domain";
+
+/**
+ * Account hub. Rows either navigate to a screen that exists, open one of the
+ * two detail modals below, or - for the parts of the menu that have no screen
+ * behind them yet - say so rather than leading somewhere empty.
+ */
+
+type RowAction =
+  | { kind: "route"; href: any }
+  | { kind: "modal"; modal: "personal" | "kyc" }
+  | { kind: "soon" };
+
+interface MenuRow {
+  label: string;
+  icon: IconName;
+  tint: string;
+  tintBg: string;
+  action: RowAction;
+}
+
+interface MenuSection {
+  title: string;
+  rows: MenuRow[];
+}
+
+const SECTIONS: MenuSection[] = [
+  {
+    title: "Account",
+    rows: [
+      {
+        label: "Personal Information",
+        icon: "person",
+        tint: "#6D28D9",
+        tintBg: "#F1ECFE",
+        action: { kind: "modal", modal: "personal" },
+      },
+      {
+        label: "KYC Details",
+        icon: "card",
+        tint: "#2563EB",
+        tintBg: "#EAF1FE",
+        action: { kind: "modal", modal: "kyc" },
+      },
+      {
+        label: "GST Details",
+        icon: "receipt",
+        tint: "#7C3AED",
+        tintBg: "#F1ECFE",
+        action: { kind: "soon" },
+      },
+      {
+        label: "ITR History",
+        icon: "reader",
+        tint: "#EA580C",
+        tintBg: "#FEF0E6",
+        action: { kind: "soon" },
+      },
+      {
+        label: "Loan History",
+        icon: "business",
+        tint: "#475569",
+        tintBg: "#EEF2F6",
+        action: { kind: "soon" },
+      },
+    ],
+  },
+  {
+    title: "Services",
+    rows: [
+      {
+        label: "My Applications",
+        icon: "folder",
+        tint: "#D97706",
+        tintBg: "#FDF2E3",
+        action: { kind: "route", href: "/(main)/applications" },
+      },
+      {
+        label: "My Documents",
+        icon: "document-text",
+        tint: "#2563EB",
+        tintBg: "#EAF1FE",
+        action: { kind: "route", href: "/(main)/documents" },
+      },
+      {
+        label: "Payments & Invoices",
+        icon: "card",
+        tint: "#0891B2",
+        tintBg: "#E5F5F9",
+        action: { kind: "route", href: "/(main)/payments" },
+      },
+      {
+        label: "Notifications",
+        icon: "notifications",
+        tint: "#EA580C",
+        tintBg: "#FEF0E6",
+        action: { kind: "route", href: "/notifications" },
+      },
+    ],
+  },
+  {
+    title: "Security",
+    rows: [
+      {
+        label: "Change Password",
+        icon: "lock-closed",
+        tint: "#DC2626",
+        tintBg: "#FDEBEB",
+        action: { kind: "soon" },
+      },
+      {
+        label: "Two-Factor Authentication",
+        icon: "keypad",
+        tint: "#6D28D9",
+        tintBg: "#F1ECFE",
+        action: { kind: "soon" },
+      },
+      {
+        label: "Login History",
+        icon: "time",
+        tint: "#475569",
+        tintBg: "#EEF2F6",
+        action: { kind: "soon" },
+      },
+      {
+        label: "Privacy Settings",
+        icon: "shield-half",
+        tint: "#D97706",
+        tintBg: "#FDF2E3",
+        action: { kind: "soon" },
+      },
+    ],
+  },
+  {
+    title: "Support",
+    rows: [
+      {
+        label: "Customer Support",
+        icon: "chatbubbles",
+        tint: "#2563EB",
+        tintBg: "#EAF1FE",
+        action: { kind: "route", href: "/chat/support" },
+      },
+      {
+        label: "Rate TaxEdge",
+        icon: "star",
+        tint: "#D97706",
+        tintBg: "#FDF2E3",
+        action: { kind: "soon" },
+      },
+      {
+        label: "Terms & Conditions",
+        icon: "document-text",
+        tint: "#475569",
+        tintBg: "#EEF2F6",
+        action: { kind: "soon" },
+      },
+      {
+        label: "Privacy Policy",
+        icon: "shield-checkmark",
+        tint: "#0891B2",
+        tintBg: "#E5F5F9",
+        action: { kind: "soon" },
+      },
+    ],
+  },
+];
+
+/** ₹18,000 -> ₹18K, so the stat tile never wraps. */
+const compactRupees = (value: number): string => {
+  if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
+  if (value >= 1000) {
+    const thousands = value / 1000;
+    return `₹${thousands % 1 === 0 ? thousands : thousands.toFixed(1)}K`;
+  }
+  return `₹${value}`;
+};
 
 export default function ProfileScreen() {
   const colors = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { customer, logout, setAvatar } = useAuthStore();
+  const applications = useApplicationStore((state) => state.applications);
+
   const [pickingPhoto, setPickingPhoto] = useState(false);
   const [showKycModal, setShowKycModal] = useState(false);
+  const [showPersonalModal, setShowPersonalModal] = useState(false);
 
-  /* Profile photo: gallery or camera, stored on the customer record. */
+  /* ---------- Stats ---------- */
+  const activeCount = applications.filter(
+    (app) => app.status !== "Completed",
+  ).length;
+  const completedCount = applications.filter(
+    (app) => app.status === "Completed",
+  ).length;
+  const totalPaid = applications
+    .filter((app) => app.paymentStatus === "Paid")
+    .reduce((sum, app) => sum + app.paymentAmount, 0);
+
+  /* KYC reads as verified once both identity documents are on file. */
+  const allDocuments = applications.flatMap((app) => app.documents);
+  const hasUploaded = (keyword: string) =>
+    allDocuments.some(
+      (doc) =>
+        doc.name.toLowerCase().includes(keyword) && doc.status === "Uploaded",
+    );
+  const kycVerified = hasUploaded("pan") && hasUploaded("aadhaar");
+
+  /* ---------- Profile photo ---------- */
   const pickFromLibrary = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
@@ -105,45 +307,43 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const handleHelpSupport = () => {
-    Alert.alert(
-      "Help & Support",
-      "Need assistance? You can email us at support@taxedge.com or call our toll-free line at 1800-TAX-EDGE.\n\nOur executives are available Mon-Sat, 9AM - 6PM.",
-      [{ text: "OK" }],
-    );
+  const runAction = (row: MenuRow) => {
+    switch (row.action.kind) {
+      case "route":
+        router.push(row.action.href);
+        return;
+      case "modal":
+        if (row.action.modal === "kyc") setShowKycModal(true);
+        else setShowPersonalModal(true);
+        return;
+      case "soon":
+        Alert.alert(row.label, "This section isn't available yet.");
+    }
   };
+
+  const infoRow = (label: string, value: string) => (
+    <View key={label} style={styles.infoRow}>
+      <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
+        {label}
+      </Text>
+      <Text style={[styles.infoValue, { color: colors.text }]}>{value}</Text>
+    </View>
+  );
 
   return (
     <ScreenLayout title="My Profile">
-
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: SCREEN_BOTTOM_PADDING }]}
+        contentContainerStyle={{ paddingBottom: SCREEN_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile Avatar Card */}
-        <View
-          style={[
-            styles.profileCard,
-            {
-              backgroundColor: colors.backgroundElement,
-              borderColor: colors.border,
-            },
-          ]}
-        >
+        {/* ---------- Hero ---------- */}
+        <View style={[styles.hero, { backgroundColor: colors.primaryDark }]}>
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={handleChangePhoto}
             style={styles.avatarWrap}
           >
-            <View
-              style={[
-                styles.avatarBg,
-                {
-                  backgroundColor: colors.orangeLight,
-                  borderColor: colors.backgroundElement,
-                },
-              ]}
-            >
+            <View style={styles.avatarBg}>
               {customer?.avatarUri ? (
                 <Image
                   source={{ uri: customer.avatarUri }}
@@ -151,9 +351,7 @@ export default function ProfileScreen() {
                   resizeMode="cover"
                 />
               ) : (
-                <Text style={[styles.avatarText, { color: colors.orange }]}>
-                  {customer?.name ? customer.name.charAt(0) : "C"}
-                </Text>
+                <Ionicons name="person" size={38} color="#FFFFFF" />
               )}
 
               {pickingPhoto && (
@@ -163,153 +361,183 @@ export default function ProfileScreen() {
               )}
             </View>
 
-            <View
-              style={[
-                styles.cameraBadge,
-                {
-                  backgroundColor: colors.primary,
-                  borderColor: colors.backgroundElement,
-                },
-              ]}
-            >
-              <Ionicons name="camera" size={14} color="#FFFFFF" />
+            <View style={[styles.editBadge, { backgroundColor: colors.orange }]}>
+              <Ionicons name="pencil" size={12} color="#FFFFFF" />
             </View>
           </TouchableOpacity>
-          <Text style={[styles.profileName, { color: colors.text }]}>
+
+          <Text style={styles.heroName}>
             {customer?.name || "Customer Profile"}
           </Text>
-          <Text style={[styles.profileType, { color: colors.primary }]}>
-            {customer?.customerType || "Client"}
+          <Text style={styles.heroId}>
+            Customer ID: {customer?.customerId || "N/A"}
           </Text>
 
-          <View
-            style={[styles.idBadge, { backgroundColor: colors.background }]}
-          >
-            <Text style={[styles.idLabel, { color: colors.textSecondary }]}>
-              CUSTOMER ID:{" "}
-            </Text>
-            <Text style={[styles.idVal, { color: colors.text }]}>
-              {customer?.customerId || "N/A"}
-            </Text>
+          <View style={styles.pillRow}>
+            <View style={styles.pill}>
+              <Text style={styles.pillText}>
+                {customer?.customerType || "Client"}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.pill,
+                styles.pillOutline,
+                { borderColor: kycVerified ? "#7BE0A8" : colors.orange },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.pillText,
+                  { color: kycVerified ? "#7BE0A8" : colors.orange },
+                ]}
+              >
+                {kycVerified ? "KYC Verified ✓" : "KYC Pending"}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Menu Options */}
-        <View style={styles.menuList}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setShowKycModal(true)}
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={20}
-              color={colors.primary}
-            />
-            <Text style={[styles.menuText, { color: colors.text }]}>
-              KYC Details (PAN & Aadhaar)
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push("/(main)/applications")}
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons
-              name="folder-open-outline"
-              size={20}
-              color={colors.primary}
-            />
-            <Text style={[styles.menuText, { color: colors.text }]}>
-              My Applications
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push("/(main)/payments")}
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons name="card-outline" size={20} color={colors.primary} />
-            <Text style={[styles.menuText, { color: colors.text }]}>
-              Payment History
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleHelpSupport}
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons
-              name="help-circle-outline"
-              size={20}
-              color={colors.primary}
-            />
-            <Text style={[styles.menuText, { color: colors.text }]}>
-              Help & Support
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
+        {/* ---------- Stats ---------- */}
+        <View
+          style={[
+            styles.statsCard,
+            {
+              backgroundColor: colors.backgroundElement,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          {[
+            { value: `${activeCount}`, label: "Active Apps", color: colors.primary },
+            {
+              value: `${completedCount}`,
+              label: "Completed",
+              color: colors.success,
+            },
+            {
+              value: compactRupees(totalPaid),
+              label: "Total Paid",
+              color: colors.orange,
+            },
+          ].map((stat) => (
+            <View key={stat.label} style={styles.statCell}>
+              <Text style={[styles.statValue, { color: stat.color }]}>
+                {stat.value}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+                {stat.label}
+              </Text>
+            </View>
+          ))}
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handleLogout}
-          style={[styles.logoutBtn, { borderColor: colors.error }]}
-        >
-          <Ionicons name="log-out-outline" size={20} color={colors.error} />
-          <Text style={[styles.logoutText, { color: colors.error }]}>
-            Logout
-          </Text>
-        </TouchableOpacity>
+        {/* ---------- Menu ---------- */}
+        <View style={styles.menuArea}>
+          {SECTIONS.map((section) => (
+            <View key={section.title}>
+              <Text
+                style={[styles.sectionLabel, { color: colors.textSecondary }]}
+              >
+                {section.title.toUpperCase()}
+              </Text>
+
+              <View
+                style={[
+                  styles.sectionCard,
+                  {
+                    backgroundColor: colors.backgroundElement,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                {section.rows.map((row, index) => (
+                  <TouchableOpacity
+                    key={row.label}
+                    activeOpacity={0.75}
+                    onPress={() => runAction(row)}
+                    style={[
+                      styles.row,
+                      index > 0 && [
+                        styles.rowBorderTop,
+                        { borderTopColor: colors.border },
+                      ],
+                    ]}
+                  >
+                    <View
+                      style={[styles.rowIcon, { backgroundColor: row.tintBg }]}
+                    >
+                      <Ionicons name={row.icon} size={17} color={row.tint} />
+                    </View>
+                    <Text style={[styles.rowLabel, { color: colors.text }]}>
+                      {row.label}
+                    </Text>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={17}
+                      color={colors.textSecondary}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          ))}
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleLogout}
+            style={[
+              styles.logoutBtn,
+              {
+                borderColor: colors.error,
+                backgroundColor: colors.backgroundElement,
+              },
+            ]}
+          >
+            <Ionicons name="log-out-outline" size={19} color={colors.error} />
+            <Text style={[styles.logoutText, { color: colors.error }]}>
+              Logout
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
-      {/* KYC Modal */}
+      {/* ---------- Personal information ---------- */}
+      <Modal
+        visible={showPersonalModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPersonalModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContainer,
+              { backgroundColor: colors.backgroundElement },
+            ]}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Personal Information
+            </Text>
+
+            <View style={styles.modalBody}>
+              {infoRow("Full Name", customer?.name || "N/A")}
+              {infoRow("Mobile", customer?.mobile || "N/A")}
+              {infoRow("Email", customer?.email || "N/A")}
+              {infoRow("Date of Birth", customer?.dob || "N/A")}
+              {infoRow("Customer Type", customer?.customerType || "N/A")}
+              {infoRow("Address", customer?.address || "N/A")}
+            </View>
+
+            <SecondaryButton
+              title="Close"
+              onPress={() => setShowPersonalModal(false)}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* ---------- KYC ---------- */}
       <Modal
         visible={showKycModal}
         transparent
@@ -324,58 +552,48 @@ export default function ProfileScreen() {
             ]}
           >
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              KYC Details Verification
+              KYC Details
             </Text>
 
             <View style={styles.modalBody}>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  PAN Number
-                </Text>
-                <Text
-                  style={[
-                    styles.infoValue,
-                    { color: colors.text, fontWeight: "700" },
-                  ]}
-                >
-                  {customer?.pan
-                    ? `${customer.pan.substring(0, 5)}****${customer.pan.substring(9)}`
-                    : "N/A"}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
-                  Aadhaar Number
-                </Text>
-                <Text
-                  style={[
-                    styles.infoValue,
-                    { color: colors.text, fontWeight: "700" },
-                  ]}
-                >
-                  {customer?.aadhaar
-                    ? `**** **** ${customer.aadhaar.substring(8)}`
-                    : "N/A"}
-                </Text>
-              </View>
+              {infoRow(
+                "PAN Number",
+                customer?.pan
+                  ? `${customer.pan.substring(0, 5)}****${customer.pan.substring(9)}`
+                  : "N/A",
+              )}
+              {infoRow(
+                "Aadhaar Number",
+                customer?.aadhaar
+                  ? `**** **** ${customer.aadhaar.substring(8)}`
+                  : "N/A",
+              )}
               <View style={styles.infoRow}>
                 <Text style={[styles.infoKey, { color: colors.textSecondary }]}>
                   Verification Status
                 </Text>
                 <View style={styles.statusLabelContainer}>
                   <Ionicons
-                    name="checkmark-circle"
+                    name={kycVerified ? "checkmark-circle" : "time"}
                     size={16}
-                    color={colors.success}
+                    color={kycVerified ? colors.success : colors.orange}
                   />
                   <Text
-                    style={[styles.statusLabelText, { color: colors.success }]}
+                    style={[
+                      styles.statusLabelText,
+                      { color: kycVerified ? colors.success : colors.orange },
+                    ]}
                   >
-                    VERIFIED ✓
+                    {kycVerified ? "VERIFIED ✓" : "PENDING"}
                   </Text>
                 </View>
               </View>
             </View>
+
+            <Text style={[styles.modalNote, { color: colors.textSecondary }]}>
+              Status reflects the PAN and Aadhaar documents uploaded against
+              your applications.
+            </Text>
 
             <SecondaryButton
               title="Close"
@@ -388,162 +606,3 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
-    gap: 16,
-  },
-  profileCard: {
-    borderRadius: 16,
-    borderWidth: 1.5,
-    padding: 24,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  avatarWrap: {
-    marginBottom: 12,
-  },
-  avatarBg: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    borderWidth: 3,
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-  },
-  avatarLoading: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cameraBadge: {
-    position: "absolute",
-    right: -2,
-    bottom: -2,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2.5,
-  },
-  avatarText: {
-    fontSize: 28,
-    fontWeight: "800",
-  },
-  profileName: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  profileType: {
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    marginTop: 4,
-  },
-  idBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  idLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-  },
-  idVal: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  menuList: {
-    gap: 12,
-  },
-  menuItem: {
-    height: 54,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  menuText: {
-    flex: 1,
-    marginLeft: 14,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  logoutBtn: {
-    height: 52,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 16,
-  },
-  logoutText: {
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  modalContainer: {
-    width: "100%",
-    maxWidth: 320,
-    borderRadius: 16,
-    padding: 20,
-    gap: 16,
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  modalBody: {
-    gap: 12,
-  },
-  infoRow: {
-    flexDirection: "column",
-    gap: 4,
-  },
-  infoKey: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  statusLabelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 2,
-  },
-  statusLabelText: {
-    fontSize: 12,
-    fontWeight: "800",
-  },
-});

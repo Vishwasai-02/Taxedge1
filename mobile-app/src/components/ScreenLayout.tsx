@@ -42,6 +42,7 @@ export interface ScreenLayoutProps {
   children?: ReactNode;
   showBack?: boolean;
   showNotification?: boolean;
+  onBack?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -50,6 +51,7 @@ export function ScreenLayout({
   children,
   showBack = false,
   showNotification = true,
+  onBack,
   style,
 }: ScreenLayoutProps) {
   const colors = useTheme();
@@ -61,6 +63,7 @@ export function ScreenLayout({
         title={title}
         showBack={showBack}
         showNotification={showNotification}
+        onBack={onBack}
       />
       {children}
     </View>

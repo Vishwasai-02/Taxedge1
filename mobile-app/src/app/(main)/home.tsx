@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -10,6 +9,7 @@ import {
   Modal,
   Pressable,
   StatusBar,
+  TextInput,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
@@ -25,6 +25,8 @@ import { SERVICE_CATALOGUE } from "../../data/catalogue";
 import { SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Maybe } from "../../utils/functional";
+import { Spacing } from "../../shared/theme";
+import { styles } from "./home.styles";
 import type {
   CatalogueItem,
   IconName,
@@ -75,12 +77,6 @@ interface ApplyBanner {
   bg: string;
 }
 
-interface MenuItem {
-  label: string;
-  icon: IconName;
-  route: Href;
-}
-
 /** Anything carrying the two-tone palette used by the tiles and stat cards. */
 interface Tinted {
   tint: string;
@@ -89,7 +85,7 @@ interface Tinted {
 
 const { width } = Dimensions.get("window");
 
-const H_PADDING = 16;
+const H_PADDING = Spacing.base;
 const CARD_WIDTH = width - H_PADDING * 2;
 
 /* Full service catalogue. The first five are the primary row; the rest fill the
@@ -106,7 +102,7 @@ const SERVICE_TILES: ServiceTile[] = [
   { id: "gst-reg", label: "GST Reg.", icon: "create", tint: "#1D4ED8", tintBg: "#E8EFFD", route: "/service/gst-registration" },
   { id: "gst-filing", label: "GST Filing", icon: "cloud-upload", tint: "#0891B2", tintBg: "#E5F5F9", route: "/service/gst-filing" },
   { id: "compliance", label: "Compliance", icon: "checkmark-done-circle", tint: "#059669", tintBg: "#E6F5F0", route: "/service/gst-compliance" },
-  { id: "consultation", label: "Tax Advice", icon: "chatbubbles", tint: "#B45309", tintBg: "#FBF1E3", route: "/(main)/services" },
+  { id: "consultation", label: "Tax Advice", icon: "chatbubbles", tint: "#B45309", tintBg: "#FBF1E3", route: "/services" },
 
   { id: "personal-loan", label: "Personal Loan", icon: "person", tint: "#D97706", tintBg: "#FDF2E3", route: "/service/personal-loan" },
   { id: "working-capital", label: "Working Cap.", icon: "trending-up", tint: "#047857", tintBg: "#E5F3EF", route: "/service/working-capital" },
@@ -175,27 +171,17 @@ const BANNER_NAVY_DEEP = "#052750";
 
 const APPLY_BANNERS: ApplyBanner[] = (
   [
-  { key: "b-gst", id: "GST", title: "GST", desc: "Registration, filing & compliance", cta: "Apply Now", icon: "receipt" },
-  { key: "b-itr", id: "ITR", title: "ITR & TDS", desc: "File returns, claim your refund", cta: "File Now", icon: "calculator" },
-  { key: "b-loans", id: "LOANS", title: "LOANS", desc: "Explore our loan solutions", cta: "Explore", icon: "wallet" },
-  { key: "b-ins", id: "INSURANCE", title: "INSURANCE", desc: "Health & life cover plans", cta: "Get Quote", icon: "shield-checkmark" },
-  { key: "b-company", id: "BUSINESS", title: "COMPANY SETUP", desc: "Incorporation & registrations", cta: "Start Now", icon: "business" },
-  { key: "b-acct", id: "BUSINESS", title: "ACCOUNTING", desc: "Bookkeeping & monthly reports", cta: "Know More", icon: "stats-chart" },
+    { key: "b-gst", id: "GST", title: "GST", desc: "Registration, filing & compliance", cta: "Apply Now", icon: "receipt" },
+    { key: "b-itr", id: "ITR", title: "ITR & TDS", desc: "File returns, claim your refund", cta: "File Now", icon: "calculator" },
+    { key: "b-loans", id: "LOANS", title: "LOANS", desc: "Explore our loan solutions", cta: "Explore", icon: "wallet" },
+    { key: "b-ins", id: "INSURANCE", title: "INSURANCE", desc: "Health & life cover plans", cta: "Get Quote", icon: "shield-checkmark" },
+    { key: "b-company", id: "BUSINESS", title: "COMPANY SETUP", desc: "Incorporation & registrations", cta: "Start Now", icon: "business" },
+    { key: "b-acct", id: "BUSINESS", title: "ACCOUNTING", desc: "Bookkeeping & monthly reports", cta: "Know More", icon: "stats-chart" },
   ] as const
 ).map((banner, i) => ({
   ...banner,
   bg: i % 2 === 0 ? BANNER_NAVY : BANNER_NAVY_DEEP,
 }));
-
-const MENU_ITEMS: MenuItem[] = [
-  { label: "Home", icon: "home-outline", route: "/(main)/home" },
-  { label: "Services", icon: "grid-outline", route: "/(main)/services" },
-  { label: "Applications", icon: "document-text-outline", route: "/(main)/applications" },
-  { label: "Payments", icon: "cash-outline", route: "/(main)/payments" },
-  { label: "GST Index", icon: "book-outline", route: "/(main)/gst" },
-  { label: "Notifications", icon: "notifications-outline", route: "/notifications" },
-  { label: "Profile", icon: "person-outline", route: "/(main)/profile" },
-];
 
 export default function HomeScreen() {
   const colors = useTheme();
@@ -205,8 +191,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   const [bannerPage, setBannerPage] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [moreQuery, setMoreQuery] = useState("");
   const bannerRef = useRef<ScrollView>(null);
   const bannerPageRef = useRef(0);
 
@@ -251,14 +237,9 @@ export default function HomeScreen() {
 
   const handleExploreCategory = (categoryId: ServiceCategoryId) => {
     router.push({
-      pathname: "/(main)/services",
+      pathname: "/services",
       params: { selectedCategory: categoryId },
     });
-  };
-
-  const go = (route: Href) => {
-    setMenuOpen(false);
-    router.push(route);
   };
 
   const openCatalogueItem = (
@@ -275,12 +256,24 @@ export default function HomeScreen() {
 
   const openTile = (tile: ServiceTile) => {
     if (tile.isMore) {
+      setMoreQuery("");
       setMoreOpen(true);
       return;
     }
     setMoreOpen(false);
     if (tile.route) router.push(tile.route);
   };
+
+  /* Catalogue narrowed by the sheet's search box; empty sections drop out. */
+  const catalogueQuery = moreQuery.trim().toLowerCase();
+  const filteredCatalogue = SERVICE_CATALOGUE.map((group) => ({
+    ...group,
+    items: catalogueQuery
+      ? group.items.filter((item) =>
+        item.label.toLowerCase().includes(catalogueQuery),
+      )
+      : group.items,
+  })).filter((group) => group.items.length > 0);
 
   const onBannerScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const page = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
@@ -304,20 +297,34 @@ export default function HomeScreen() {
       <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} />
 
       {/* ---------- Blue hero header ---------- */}
-      <View style={[styles.heroHeader, { backgroundColor: colors.primaryDark, paddingTop: insets.top + 8 }]}>
+      <View style={[styles.heroHeader, { backgroundColor: colors.primaryDark, paddingTop: insets.top + Spacing.sm }]}>
         <View style={styles.topHeaderRow}>
-          <TouchableOpacity onPress={() => setMenuOpen(true)} style={styles.menuBtn} hitSlop={8}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/(main)/profile")}
+            style={styles.menuBtn}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Open profile"
+          >
             <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
 
           <View style={styles.brandContainer}>
-            <View style={styles.logoBox}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push("/(main)/profile")}
+              style={styles.logoBox}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Open profile"
+            >
               <Image
                 source={require("../../../assets/images/logo.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
-            </View>
+            </TouchableOpacity>
             <View>
               <Text style={styles.brandText}>TAXEDGE</Text>
               <Text style={styles.brandSubText}>FIN SOLUTIONS</Text>
@@ -333,13 +340,6 @@ export default function HomeScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/(main)/profile")} style={styles.iconBtn} hitSlop={6}>
-              {customer?.avatarUri ? (
-                <Image source={{ uri: customer.avatarUri }} style={styles.headerAvatar} />
-              ) : (
-                <Ionicons name="person-circle-outline" size={28} color="#FFFFFF" />
-              )}
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -348,17 +348,8 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>Hello, {customerName} 👋</Text>
             <Text style={styles.welcomeSubText}>What can we help you with today?</Text>
           </View>
-          <SavingsJarAnimation accent={colors.orange} />
+          <SavingsJarAnimation accent={colors.orange} scale={0.8} />
         </View>
-
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => router.push("/(main)/services")}
-          style={styles.searchBar}
-        >
-          <Ionicons name="search" size={20} color="#94A3B8" />
-          <Text style={styles.searchPlaceholder}>Search services, applications, documents...</Text>
-        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -456,6 +447,10 @@ export default function HomeScreen() {
             ))}
           </View>
         </View>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Financial Overview</Text>
+
+        </View>
 
         {/* ---------- Stats grid ---------- */}
         <View style={styles.statsGrid}>
@@ -493,10 +488,10 @@ export default function HomeScreen() {
               onPress={() => router.push(item.route)}
               style={[
                 styles.deadlineRow,
-                index < UPCOMING_DEADLINES.length - 1 && {
-                  borderBottomWidth: StyleSheet.hairlineWidth,
-                  borderBottomColor: colors.border,
-                },
+                index < UPCOMING_DEADLINES.length - 1 && [
+                  styles.deadlineRowBorder,
+                  { borderBottomColor: colors.border },
+                ],
               ]}
             >
               <View style={[styles.deadlineTag, { backgroundColor: isDark ? colors.backgroundSelected : item.tintBg }]}>
@@ -610,759 +605,138 @@ export default function HomeScreen() {
         animationType="slide"
         onRequestClose={() => setMoreOpen(false)}
       >
-        <Pressable style={styles.sheetBackdrop} onPress={() => setMoreOpen(false)}>
+        <Pressable
+          style={styles.sheetBackdrop}
+          onPress={() => setMoreOpen(false)}
+        >
           <Pressable
             style={[
               styles.sheet,
-              { backgroundColor: colors.backgroundElement, paddingBottom: insets.bottom + 12 },
+              {
+                backgroundColor: colors.background,
+                paddingBottom: insets.bottom + 12,
+              },
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-
             <View style={styles.sheetHeader}>
-              <View>
-                <Text style={[styles.sheetTitle, { color: colors.text }]}>Explore Services</Text>
-                <Text style={[styles.sheetSubtitle, { color: colors.textSecondary }]}>
-                  Everything TaxEdge can file, fund and cover
-                </Text>
-              </View>
+              <Text style={[styles.sheetTitle, { color: colors.text }]}>
+                Explore Services
+              </Text>
               <TouchableOpacity onPress={() => setMoreOpen(false)} hitSlop={10}>
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
+                <Text style={[styles.sheetDone, { color: colors.orange }]}>
+                  Done
+                </Text>
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {SERVICE_CATALOGUE.map((group, groupIndex) => (
-                <View
-                  key={`${group.id}-${groupIndex}`}
-                  style={[
-                    styles.catGroup,
-                    { backgroundColor: colors.background, borderColor: colors.border },
-                  ]}
-                >
+            <View
+              style={[
+                styles.sheetSearch,
+                {
+                  backgroundColor: colors.backgroundElement,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Ionicons name="search" size={17} color={colors.textSecondary} />
+              <TextInput
+                value={moreQuery}
+                onChangeText={setMoreQuery}
+                placeholder="Search services..."
+                placeholderTextColor={colors.textSecondary}
+                style={[styles.sheetSearchInput, { color: colors.text }]}
+                autoCorrect={false}
+                returnKeyType="search"
+              />
+              {moreQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setMoreQuery("")} hitSlop={8}>
+                  <Ionicons
+                    name="close-circle"
+                    size={17}
+                    color={colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.sheetScrollContent}
+            >
+              {filteredCatalogue.map((group, groupIndex) => (
+                <View key={`${group.id}-${groupIndex}`}>
                   <View style={styles.catHeader}>
                     <View
                       style={[
                         styles.catIcon,
-                        { backgroundColor: isDark ? colors.backgroundSelected : group.tintBg },
+                        {
+                          backgroundColor: isDark
+                            ? colors.backgroundSelected
+                            : "#E8EFF7",
+                        },
                       ]}
                     >
                       <Ionicons
                         name={group.icon}
-                        size={20}
-                        color={isDark ? colors.text : group.tint}
+                        size={16}
+                        color={colors.primary}
                       />
                     </View>
-                    <View style={styles.catHeaderText}>
-                      <Text style={[styles.catTitle, { color: colors.text }]}>{group.title}</Text>
-                      <Text style={[styles.catCount, { color: colors.textSecondary }]}>
-                        {group.items.length} services
-                      </Text>
-                    </View>
+                    <Text style={[styles.catTitle, { color: colors.text }]}>
+                      {group.title}
+                    </Text>
                   </View>
 
-                  <View style={styles.chipWrap}>
-                    {group.items.map((item) => (
-                      <TouchableOpacity
-                        key={item.label}
-                        activeOpacity={0.75}
-                        onPress={() => openCatalogueItem(item, group.id)}
-                        style={[
-                          styles.chip,
-                          { backgroundColor: colors.backgroundElement, borderColor: colors.border },
-                        ]}
+                  {group.items.map((item) => (
+                    <TouchableOpacity
+                      key={item.label}
+                      activeOpacity={0.75}
+                      onPress={() => openCatalogueItem(item, group.id)}
+                      style={[
+                        styles.serviceRow,
+                        {
+                          backgroundColor: colors.backgroundElement,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.serviceRowText, { color: colors.text }]}
                       >
-                        <View
-                          style={[
-                            styles.chipDot,
-                            { backgroundColor: isDark ? colors.textSecondary : group.tint },
-                          ]}
-                        />
-                        <Text style={[styles.chipText, { color: colors.text }]}>{item.label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                        {item.label}
+                      </Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={17}
+                        color={colors.textSecondary}
+                      />
+                    </TouchableOpacity>
+                  ))}
                 </View>
               ))}
 
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => {
-                  setMoreOpen(false);
-                  router.push("/(main)/services");
-                }}
-                style={[styles.sheetCta, { backgroundColor: colors.primary }]}
-              >
-                <Text style={styles.sheetCtaText}>Browse full catalogue</Text>
-                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
+              {filteredCatalogue.length === 0 && (
+                <View style={styles.sheetEmpty}>
+                  <Ionicons
+                    name="search-outline"
+                    size={34}
+                    color={colors.textSecondary}
+                  />
+                  <Text
+                    style={[styles.sheetEmptyText, { color: colors.text }]}
+                  >
+                    No services match "{moreQuery.trim()}"
+                  </Text>
+                </View>
+              )}
             </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
 
-      {/* ---------- Side menu ---------- */}
-      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
-        <Pressable style={styles.menuBackdrop} onPress={() => setMenuOpen(false)}>
-          <Pressable
-            style={[styles.menuPanel, { backgroundColor: colors.backgroundElement, paddingTop: insets.top + 16 }]}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={styles.menuHeader}>
-              {customer?.avatarUri ? (
-                <Image source={{ uri: customer.avatarUri }} style={styles.menuAvatar} />
-              ) : (
-                <View style={[styles.logoBox, { backgroundColor: colors.primaryDark }]}>
-                  <Image
-                    source={require("../../../assets/images/logo.png")}
-                    style={styles.logo}
-                    resizeMode="contain"
-                  />
-                </View>
-              )}
-              <View>
-                <Text style={[styles.menuBrand, { color: colors.text }]}>
-                  {customer?.name || "TAXEDGE"}
-                </Text>
-                <Text style={[styles.menuBrandSub, { color: colors.textSecondary }]}>
-                  {customer?.customerId || "FIN SOLUTIONS"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
-
-            {MENU_ITEMS.map((item) => (
-              <TouchableOpacity
-                key={item.label}
-                activeOpacity={0.75}
-                onPress={() => go(item.route)}
-                style={styles.menuItem}
-              >
-                <Ionicons name={item.icon} size={20} color={colors.primary} />
-                <Text style={[styles.menuItemText, { color: colors.text }]}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  /* Header */
-  heroHeader: {
-    paddingHorizontal: H_PADDING,
-    paddingBottom: 18,
-  },
-  topHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  menuBtn: {
-    paddingRight: 12,
-  },
-  brandContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  logoBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logo: {
-    width: 28,
-    height: 28,
-  },
-  brandText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-  },
-  brandSubText: {
-    color: "#B9CBE4",
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 2,
-    marginTop: 1,
-  },
-  headerIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  iconBtn: {
-    padding: 2,
-  },
-  headerAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.75)",
-  },
-  menuAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-  },
-  badge: {
-    position: "absolute",
-    top: -4,
-    right: -6,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    paddingHorizontal: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#052750",
-  },
-  badgeText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "800",
-  },
-
-  greetingRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginTop: 18,
-  },
-  greetingContainer: {
-    flex: 1,
-    paddingRight: 8,
-    paddingBottom: 6,
-  },
-  welcomeText: {
-    color: "#FFFFFF",
-    fontSize: 23,
-    fontWeight: "800",
-  },
-  welcomeSubText: {
-    color: "#CBD9EA",
-    fontSize: 14,
-    marginTop: 5,
-    fontWeight: "500",
-  },
-
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    height: 50,
-    paddingHorizontal: 16,
-    marginTop: 20,
-  },
-  searchPlaceholder: {
-    color: "#94A3B8",
-    fontSize: 14,
-    fontWeight: "500",
-    flex: 1,
-  },
-
-  /* Scroll body */
-  scrollContent: {
-    padding: H_PADDING,
-    gap: 16,
-  },
-
-  /* Banner */
-  loansBanner: {
-    // Fixed height: the slides carry different amounts of text, and without
-    // this the carousel changed size as you swiped.
-    height: BANNER_HEIGHT,
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  bannerLeft: {
-    flex: 1.4,
-  },
-  bannerTitle: {
-    color: "#FFFFFF",
-    fontSize: 22,
-    fontWeight: "800",
-    letterSpacing: 1,
-  },
-  bannerDesc: {
-    color: "#C9D8EC",
-    fontSize: 13.5,
-    marginTop: 5,
-    fontWeight: "600",
-  },
-  exploreButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 18,
-    height: 36,
-    borderRadius: 18,
-    alignSelf: "flex-start",
-    marginTop: 16,
-  },
-  exploreText: {
-    color: "#FFFFFF",
-    fontWeight: "800",
-    fontSize: 13,
-  },
-  dotGrid: {
-    position: "absolute",
-    right: 118,
-    top: 26,
-    width: 34,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    opacity: 0.55,
-  },
-  decorDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "#F97316",
-  },
-  bannerRight: {
-    flex: 0.9,
-    alignItems: "flex-end",
-  },
-  bannerIconCircle: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: "rgba(249,115,22,0.16)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  /* Generic card */
-  card: {
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingVertical: 16,
-  },
-  cardPadded: {
-    paddingHorizontal: 16,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  viewAllText: {
-    fontSize: 13,
-    fontWeight: "700",
-  },
-
-  /* Quick links */
-  bannerPage: {
-    width: CARD_WIDTH,
-  },
-  quickRow: {
-    flexDirection: "row",
-    paddingHorizontal: 10,
-  },
-  quickTile: {
-    flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 1,
-  },
-  circleIcon: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  circleLabel: {
-    fontSize: 11.5,
-    fontWeight: "700",
-    textAlign: "center",
-    marginTop: 9,
-    lineHeight: 14,
-  },
-
-  /* All services sheet */
-  sheetBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(5,39,80,0.45)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    maxHeight: "88%",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  sheetHandle: {
-    width: 44,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 14,
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 18,
-  },
-  sheetTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  sheetSubtitle: {
-    fontSize: 12.5,
-    fontWeight: "500",
-    marginTop: 3,
-  },
-
-  /* Catalogue groups */
-  catGroup: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-    marginBottom: 14,
-  },
-  catHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
-  },
-  catIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  catHeaderText: {
-    flex: 1,
-  },
-  catTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-  },
-  catCount: {
-    fontSize: 11.5,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  chipWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingLeft: 10,
-    paddingRight: 13,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-  },
-  chipDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  chipText: {
-    fontSize: 12.5,
-    fontWeight: "600",
-  },
-  sheetCta: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 48,
-    borderRadius: 14,
-    marginTop: 24,
-  },
-  sheetCtaText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "800",
-  },
-  dotsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 14,
-  },
-  pageDot: {
-    borderRadius: 4,
-  },
-
-  /* List rows */
-  emptyText: {
-    fontSize: 13,
-    fontWeight: "500",
-    textAlign: "center",
-    paddingVertical: 12,
-  },
-
-  /* Action required */
-
-  /* Stats grid */
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  statsCard: {
-    width: (CARD_WIDTH - 12) / 2,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-  },
-  statsTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  statsLabel: {
-    flex: 1,
-    fontSize: 12.5,
-    fontWeight: "600",
-    lineHeight: 16,
-  },
-  statsIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  statsNumber: {
-    fontSize: 22,
-    fontWeight: "800",
-    marginTop: 12,
-  },
-
-  /* Upcoming deadlines */
-  deadlineRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 13,
-  },
-  deadlineTag: {
-    minWidth: 44,
-    paddingHorizontal: 8,
-    height: 26,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  deadlineTagText: {
-    fontSize: 11,
-    fontWeight: "800",
-  },
-  deadlineText: {
-    flex: 1,
-  },
-  deadlineTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  deadlineDate: {
-    fontSize: 12,
-    fontWeight: "500",
-    marginTop: 3,
-  },
-  duePill: {
-    paddingHorizontal: 10,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-  },
-  duePillText: {
-    fontSize: 11,
-    fontWeight: "800",
-  },
-
-  /* Recent application cards */
-  appCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-  },
-  appCardTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  appId: {
-    fontSize: 12.5,
-    fontWeight: "700",
-    letterSpacing: 0.3,
-  },
-  statusPill: {
-    paddingHorizontal: 10,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-  },
-  statusPillText: {
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  appName: {
-    fontSize: 17,
-    fontWeight: "800",
-    marginTop: 10,
-  },
-  appCardBottom: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 14,
-  },
-  appDate: {
-    fontSize: 12.5,
-    fontWeight: "500",
-  },
-  linkRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-  },
-
-  /* Section headers */
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-  },
-
-  /* Need help */
-  helpCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: "#0B5B41",
-    borderRadius: 18,
-    padding: 16,
-    marginTop: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  helpIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.16)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  helpText: {
-    flex: 1,
-  },
-  helpTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  helpDesc: {
-    color: "#C7E5D8",
-    fontSize: 12.5,
-    fontWeight: "500",
-    marginTop: 3,
-  },
-  helpBtn: {
-    paddingHorizontal: 18,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-    justifyContent: "center",
-  },
-  helpBtnText: {
-    color: "#FFFFFF",
-    fontSize: 13.5,
-    fontWeight: "800",
-  },
-
-  /* Side menu */
-  menuBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(5,39,80,0.45)",
-    flexDirection: "row",
-  },
-  menuPanel: {
-    width: Math.min(width * 0.76, 320),
-    height: "100%",
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  menuHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  menuBrand: {
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  menuBrandSub: {
-    fontSize: 10,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  menuDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 18,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingVertical: 14,
-  },
-  menuItemText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-});

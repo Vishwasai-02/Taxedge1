@@ -11,11 +11,18 @@ import type { ApplicationDocument, IconName } from '../types/domain';
 export interface DocumentChecklistProps {
   documents: ApplicationDocument[];
   onUpload: (docName: string, fileUri: string) => void;
+  /**
+   * Sort the documents under KYC / GST / Financial headings. Turn this off when
+   * the caller has already grouped them - the vault screen passes one category
+   * at a time, and a second set of headings inside it would just repeat itself.
+   */
+  grouped?: boolean;
 }
 
 export function DocumentChecklist({
   documents,
   onUpload,
+  grouped = true,
 }: DocumentChecklistProps) {
   const colors = useTheme();
 
@@ -167,19 +174,30 @@ export function DocumentChecklist({
 
   return (
     <View style={styles.container}>
-      {categories.map((category) => {
-        const categoryDocs = documents.filter((doc) => getDocumentCategory(doc.name) === category);
-        if (categoryDocs.length === 0) return null;
+      {!grouped && (
+        <View style={styles.docsList}>
+          {documents.map((doc, idx) => renderDocItem(doc, idx))}
+        </View>
+      )}
 
-        return (
-          <View key={category} style={styles.categorySection}>
-            <Text style={[styles.categoryTitle, { color: colors.text }]}>{category}</Text>
-            <View style={styles.docsList}>
-              {categoryDocs.map((doc, idx) => renderDocItem(doc, idx))}
+      {grouped &&
+        categories.map((category) => {
+          const categoryDocs = documents.filter(
+            (doc) => getDocumentCategory(doc.name) === category,
+          );
+          if (categoryDocs.length === 0) return null;
+
+          return (
+            <View key={category} style={styles.categorySection}>
+              <Text style={[styles.categoryTitle, { color: colors.text }]}>
+                {category}
+              </Text>
+              <View style={styles.docsList}>
+                {categoryDocs.map((doc, idx) => renderDocItem(doc, idx))}
+              </View>
             </View>
-          </View>
-        );
-      })}
+          );
+        })}
 
       {/* Select Source Modal */}
       <Modal
