@@ -19,7 +19,7 @@ import { useAuthStore } from "../../store/authStore";
 import { useApplicationStore } from "../../store/applicationStore";
 
 import { ScreenLayout, SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
-import { styles } from "./profile.styles";
+import { styles } from "../../styles/app/(main)/profile.styles";
  
 import { SecondaryButton } from "../../components/SecondaryButton";
 import type { IconName } from "../../types/domain";

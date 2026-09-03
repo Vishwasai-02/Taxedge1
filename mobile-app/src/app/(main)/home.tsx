@@ -26,7 +26,7 @@ import { SCREEN_BOTTOM_PADDING } from "../../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Maybe } from "../../utils/functional";
 import { Spacing } from "../../shared/theme";
-import { styles } from "./home.styles";
+import { styles } from "../../styles/app/(main)/home.styles";
 import type {
   CatalogueItem,
   IconName,
@@ -320,7 +320,7 @@ export default function HomeScreen() {
               accessibilityLabel="Open profile"
             >
               <Image
-                source={require("../../../assets/images/logo.png")}
+                source={require("../../../assets/images/icon.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />

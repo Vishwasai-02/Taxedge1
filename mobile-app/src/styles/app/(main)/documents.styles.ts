@@ -5,7 +5,7 @@
  */
 
 import { StyleSheet } from "react-native";
-import { Spacing } from "../../shared/theme";
+import { Spacing } from "../../../shared/theme";
 
 export const styles = StyleSheet.create({
   scrollContent: {

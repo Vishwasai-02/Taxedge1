@@ -14,7 +14,7 @@ import { SERVICES, CATEGORIES } from "../data/services";
 import { ScreenLayout } from "../components/ScreenLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./services.styles";
+import { styles } from "../styles/app/services.styles";
 
 export default function ServicesScreen() {
   const colors = useTheme();

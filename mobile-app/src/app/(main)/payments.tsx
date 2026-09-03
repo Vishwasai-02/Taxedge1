@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BrandColors, Spacing } from "../../shared/theme";
 import { PaymentOrderSummaryCard } from "../../features/gst/components/payment/PaymentOrderSummaryCard";
-import { styles } from "./payments.styles";
+import { styles } from "../../styles/app/(main)/payments.styles";
 import {
   PaymentMethodSelector,
   PaymentMethodType,

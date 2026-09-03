@@ -11,7 +11,7 @@ import {
   MainVaultView,
   DocumentUploadView,
 } from "../../features/documents";
-import { styles } from "./documents.styles";
+import { styles } from "../../styles/app/(main)/documents.styles";
 
 export default function DocumentsScreen() {
   // viewMode: "VAULT" (1st image) | "UPLOAD" (2nd image)

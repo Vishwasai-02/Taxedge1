@@ -111,14 +111,20 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    gap: 8,
   },
   title: {
     fontSize: 15,
+    flex: 1,
+    flexShrink: 1,
+    lineHeight: 20,
   },
   dateText: {
     fontSize: 11,
     fontWeight: "500",
+    marginTop: 2,
+    flexShrink: 0,
   },
   desc: {
     fontSize: 13,

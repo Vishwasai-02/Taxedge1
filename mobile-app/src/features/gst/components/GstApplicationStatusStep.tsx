@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Alert } from "react-native";
+import { useRouter } from "expo-router";
 import { BrandColors } from "../../../shared/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -24,6 +25,7 @@ const TIMELINE_STEPS: TimelineItem[] = [
 ];
 
 export const GstApplicationStatusStep: React.FC = () => {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       {/* Hero Application Status Card */}
@@ -109,7 +111,7 @@ export const GstApplicationStatusStep: React.FC = () => {
       <TouchableOpacity
         style={styles.contactSupportBtn}
         activeOpacity={0.8}
-        onPress={() => Alert.alert("Contact Support", "Connecting you with your dedicated CA compliance officer.")}
+        onPress={() => router.push("/chat/support")}
       >
         <Text style={styles.contactSupportBtnText}>Contact Support</Text>
       </TouchableOpacity>
