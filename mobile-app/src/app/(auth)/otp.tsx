@@ -19,7 +19,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 
 /**
  * Step one of signup: confirm the code sent to the mobile number. Entering the
- * sixth digit - or pressing Verify - pushes on to /(auth)/create-profile, which
+ * sixth digit - or pressing Verify - pushes on to /(auth)/createprofile, which
  * owns the profile form and the registration itself.
  */
 export default function OTPScreen() {
@@ -51,7 +51,7 @@ export default function OTPScreen() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      router.push("/(auth)/create-profile");
+      router.push("/(auth)/createprofile");
     }, 250);
   };
 
@@ -142,7 +142,7 @@ export default function OTPScreen() {
               if (error) setError("");
               if (clean.length === 6) {
                 setTimeout(() => {
-                  router.push("/(auth)/create-profile");
+                  router.push("/(auth)/createprofile");
                 }, 200);
               }
             }}

@@ -319,7 +319,7 @@ export default function HomeScreen() {
               accessibilityLabel="Open profile"
             >
               <Image
-                source={require("../../../assets/images/logo.png")}
+                source={require("../../../assets/images/icon.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
