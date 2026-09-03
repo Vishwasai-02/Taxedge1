@@ -33,7 +33,7 @@ export const GstReviewStep: React.FC<GstReviewStepProps> = ({
         <View style={styles.divider} />
         <View style={styles.row}>
           <Text style={styles.label}>PAN Number</Text>
-          <Text style={styles.value}>{personalData.panNumber || "AKHIL1234K"}</Text>
+          <Text style={styles.value}>{personalData.panNumber || "PAVAN1234K"}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Aadhaar</Text>
@@ -45,7 +45,7 @@ export const GstReviewStep: React.FC<GstReviewStepProps> = ({
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{personalData.emailAddress || "akhil@business.com"}</Text>
+          <Text style={styles.value}>{personalData.emailAddress || "pavan@business.com"}</Text>
         </View>
       </View>
 
@@ -61,7 +61,7 @@ export const GstReviewStep: React.FC<GstReviewStepProps> = ({
         <View style={styles.row}>
           <Text style={styles.label}>Business Name</Text>
           <Text style={styles.value}>
-            {businessData.registeredBusinessName || personalData.businessName || "Akhil Enterprises"}
+            {businessData.registeredBusinessName || personalData.businessName || "Pavan Enterprises"}
           </Text>
         </View>
         <View style={styles.row}>
@@ -161,13 +161,13 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   docCountText: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#059669",
+    color: BrandColors.PRIMARY_ORANGE,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif-medium" }),
   },
   divider: {
@@ -202,16 +202,16 @@ const styles = StyleSheet.create({
   docProgressFill: {
     width: "45%",
     height: "100%",
-    backgroundColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     borderRadius: 3,
   },
   declarationCard: {
     flexDirection: "row",
-    backgroundColor: "#F0FDF4",
+    backgroundColor: "#FEF0E6",
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#DCFCE7",
+    borderColor: "#FFD8BF",
     gap: 12,
     alignItems: "flex-start",
     marginBottom: 10,
@@ -228,13 +228,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   checkboxActive: {
-    backgroundColor: "#059669",
-    borderColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
+    borderColor: BrandColors.PRIMARY_ORANGE,
   },
   declarationText: {
     flex: 1,
     fontSize: 12,
-    color: "#166534",
+    color: "#9A3412",
     lineHeight: 18,
     fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },

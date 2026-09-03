@@ -72,7 +72,7 @@ export default function RegisterScreen() {
     ]);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errs: ProfileFormErrors = {};
     if (!form.name.trim()) errs.name = "Full name is required";
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) errs.email = "Valid email is required";
@@ -87,9 +87,8 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      register({
+    try {
+      const res = await register({
         name: form.name,
         email: form.email,
         dob: form.dob,
@@ -98,11 +97,17 @@ export default function RegisterScreen() {
         address: form.address,
         customerType: "Individual",
       });
-      if (avatarUri) setAvatar(avatarUri);
-      const newCust = useAuthStore.getState().customer;
-      Alert.alert("Profile Created", `Welcome, ${newCust?.name || "Client"}!`);
-      router.replace("/(main)/home");
-    }, 800);
+      setLoading(false);
+      if (res.success) {
+        if (avatarUri) setAvatar(avatarUri);
+        router.replace("/(main)/home" as any);
+      } else {
+        Alert.alert("Registration Error", res.error || "Failed to create profile.");
+      }
+    } catch (err) {
+      setLoading(false);
+      Alert.alert("Registration Error", "An unexpected error occurred.");
+    }
   };
 
   return (

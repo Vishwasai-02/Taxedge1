@@ -88,10 +88,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   circleActive: {
-    backgroundColor: BrandColors.PRIMARY_BLUE,
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
   },
   circleCompleted: {
-    backgroundColor: "#059669", // Success Green checkmark as in design
+    backgroundColor: BrandColors.PRIMARY_BLUE,
   },
   numberText: {
     fontSize: 12,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: "System", android: "sans-serif" }),
   },
   labelTextActive: {
-    color: BrandColors.PRIMARY_BLUE,
+    color: BrandColors.PRIMARY_ORANGE,
     fontWeight: "700",
   },
   line: {
@@ -120,6 +120,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   lineCompleted: {
-    backgroundColor: "#059669",
+    backgroundColor: BrandColors.PRIMARY_BLUE,
   },
 });

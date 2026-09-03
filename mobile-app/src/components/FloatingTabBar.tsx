@@ -23,7 +23,6 @@ const ACTIVE_PILL_BG = "#FFFFFF"; // Clean white active pill
 const ACTIVE_ICON_COLOR = "#FF5722"; // Vibrant Orange icon when clicked/active
 const INACTIVE_ICON_COLOR = "#FFFFFF"; // Crisp white icon on blue background
 
-/* Per-route presentation. */
 const HIDDEN_FROM_BAR = new Set(["gst"]);
 
 export interface TabMeta {

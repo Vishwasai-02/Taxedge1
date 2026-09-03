@@ -19,6 +19,7 @@ export default function ServiceDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+
   const service = getServiceById(id || "");
 
   const createApplication = useApplicationStore((state) => state.createApplication);

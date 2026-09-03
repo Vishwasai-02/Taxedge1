@@ -52,7 +52,7 @@ export const GstFilingPaymentStep: React.FC = () => {
           </View>
           <View style={styles.serviceTextCol}>
             <Text style={styles.serviceTitle}>GST Filing</Text>
-            <Text style={styles.serviceSub}>Akhil Enterprises • Bengaluru</Text>
+            <Text style={styles.serviceSub}>Pavan Enterprises • Bengaluru</Text>
           </View>
         </View>
 
@@ -60,12 +60,12 @@ export const GstFilingPaymentStep: React.FC = () => {
 
         <View style={styles.row}>
           <Text style={styles.label}>Professional Fee</Text>
-          <Text style={styles.value}>₹2,000</Text>
+          <Text style={styles.value}>₹1,986</Text>
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>GST (18%)</Text>
-          <Text style={styles.value}>₹360</Text>
+          <Text style={styles.value}>₹358</Text>
         </View>
 
         <View style={styles.row}>
@@ -75,7 +75,7 @@ export const GstFilingPaymentStep: React.FC = () => {
 
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total Amount</Text>
-          <Text style={styles.totalValue}>₹2,360</Text>
+          <Text style={styles.totalValue}>₹2,344</Text>
         </View>
       </View>
 

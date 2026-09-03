@@ -270,7 +270,7 @@ export default function ApplicationDetailScreen() {
 
       {/* ---------------- FIXED BOTTOM ACTION BUTTON ---------------- */}
       <View style={[styles.bottomActionBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push(`/chat/${app.id}`)} style={styles.actionBtnFilled}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/chat/support")} style={styles.actionBtnFilled}>
           <Ionicons name="headset-outline" size={18} color="#FFFFFF" />
           <Text style={styles.actionBtnFilledText}>Support</Text>
         </TouchableOpacity>

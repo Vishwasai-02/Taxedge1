@@ -33,13 +33,13 @@ export const GstFilingScreen: React.FC = () => {
   const [periodData, setPeriodData] = useState<GstFilingPeriodData>({
     periodType: "Monthly",
     filingMonth: "July 2026",
-    gstin: "29AKHIL1234K1Z5",
+    gstin: "29PAVAN1234K1Z5",
     filingType: "GSTR-3B (Monthly Summary Return)",
   });
   const [periodErrors, setPeriodErrors] = useState<Record<string, string>>({});
 
   const [selectedMethod, setSelectedMethod] = useState("upi");
-  const [upiId, setUpiId] = useState("akhil@paytm");
+  const [upiId, setUpiId] = useState("pavan@ybl");
   const [upiError, setUpiError] = useState("");
 
   const getScreenTitle = () => {
@@ -59,7 +59,7 @@ export const GstFilingScreen: React.FC = () => {
       case 0: return "Continue to Documents";
       case 1: return "Continue to Review";
       case 2: return "Approve & Proceed to Payment";
-      case 3: return "Pay Securely ₹5,900";
+      case 3: return "Pay Securely ₹2,344";
       default: return "";
     }
   };
@@ -67,7 +67,7 @@ export const GstFilingScreen: React.FC = () => {
   const validatePeriodStep = (): boolean => {
     const errs: Record<string, string> = {};
     if (!GstValidators.isValidGstin(periodData.gstin)) {
-      errs.gstin = "Enter a valid 15-character GSTIN (e.g. 29AKHIL1234K1Z5)";
+      errs.gstin = "Enter a valid 15-character GSTIN (e.g. 29PAVAN1234K1Z5)";
     }
     if (!GstValidators.isNotEmpty(periodData.filingMonth)) {
       errs.filingMonth = "Please select a filing month";
@@ -87,7 +87,7 @@ export const GstFilingScreen: React.FC = () => {
   const validatePaymentStep = (): boolean => {
     if (selectedMethod === "upi") {
       if (!GstValidators.isValidUpi(upiId)) {
-        setUpiError("Enter a valid UPI ID (e.g. yourname@bank / akhil@paytm)");
+        setUpiError("Enter a valid UPI ID (e.g. yourname@bank / pavan@ybl)");
         Alert.alert("Invalid UPI ID", "Please enter a valid UPI ID to proceed with payment.");
         return false;
       }
@@ -119,10 +119,7 @@ export const GstFilingScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <View style={styles.root}>
       {/* Top Header Bar */}
       <View style={[styles.headerBar, { paddingTop: Math.max(insets.top, 12) + 6 }]}>
         <TouchableOpacity
@@ -138,12 +135,16 @@ export const GstFilingScreen: React.FC = () => {
 
       {/* Main Scroll Content */}
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + (currentStep <= 3 ? 90 : 30) },
+          currentStep >= 4 && { paddingBottom: 24 },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        bounces={true}
+        overScrollMode="always"
+        nestedScrollEnabled={true}
       >
         {currentStep === 0 && (
           <GstFilingPeriodStep
@@ -176,7 +177,7 @@ export const GstFilingScreen: React.FC = () => {
 
         {currentStep === 3 && (
           <GstPaymentMethodStep
-            amount="₹5,900"
+            amount="₹2,344"
             selectedMethod={selectedMethod}
             onSelectMethod={setSelectedMethod}
             upiId={upiId}
@@ -190,7 +191,7 @@ export const GstFilingScreen: React.FC = () => {
 
         {currentStep === 4 && (
           <GstPaymentSuccessStep
-            amount="₹5,900"
+            amount="₹2,344"
             serviceName="GST Filing"
             onViewReceipt={() => setCurrentStep(5)}
             onViewApplication={() => setCurrentStep(6)}
@@ -199,28 +200,28 @@ export const GstFilingScreen: React.FC = () => {
 
         {currentStep === 5 && (
           <GstPaymentReceiptStep
-            amount="₹5,900"
+            amount="₹2,344"
             serviceName="GST Filing Service"
             invoiceNo="INV-2026-00001"
           />
         )}
 
         {currentStep === 6 && <GstApplicationStatusStep />}
-      </ScrollView>
 
-      {/* Sticky Bottom Action Button for Steps 0-3 */}
-      {currentStep <= 3 && (
-        <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={handleContinue}
-            style={styles.submitBtn}
-          >
-            <Text style={styles.submitBtnText}>{getButtonText()}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </KeyboardAvoidingView>
+        {/* Action Button - In scroll view so it stays at the bottom and never floats over inputs */}
+        {currentStep <= 3 && (
+          <View style={styles.buttonWrapper}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={handleContinue}
+              style={styles.submitBtn}
+            >
+              <Text style={styles.submitBtnText}>{getButtonText()}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -256,30 +257,27 @@ const styles = StyleSheet.create({
   placeholderBox: {
     width: 38,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 18,
     flexGrow: 1,
+    paddingBottom: 260,
   },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+  buttonWrapper: {
+    marginTop: 22,
+    marginBottom: 8,
   },
   submitBtn: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: BrandColors.PRIMARY_BLUE,
+    backgroundColor: BrandColors.PRIMARY_ORANGE,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: BrandColors.PRIMARY_BLUE,
+    shadowColor: BrandColors.PRIMARY_ORANGE,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
   },
