@@ -16,7 +16,7 @@ import { useTheme } from "../../hooks/use-theme";
 import { BrandColors, BorderWidth, Spacing } from "../../shared/theme";
 import { useAuthStore } from "../../store/authStore";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { styles } from "./otp.styles";
+import { styles } from "../../styles/app/(auth)/otp.styles";
 
 /**
  * Step one of signup: confirm the code sent to the mobile number. Entering the

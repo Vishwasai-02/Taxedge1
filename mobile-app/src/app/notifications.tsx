@@ -7,7 +7,7 @@ import { useNotificationStore } from "../store/notificationStore";
 import { AppHeader } from "../components/AppHeader";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./notifications.styles";
+import { styles } from "../styles/app/notifications.styles";
 import type { IconName, NotificationType } from "../types/domain";
 
 export default function NotificationsScreen() {

@@ -11,7 +11,7 @@ import { DynamicForm } from "../../components/DynamicForm";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { styles } from "./[id].styles";
+import { styles } from "../../styles/app/service/[id].styles";
 import type { ApplicationFormData, NotificationType } from "../../types/domain";
 
 type ServiceTab = "Overview" | "Documents" | "Benefits";

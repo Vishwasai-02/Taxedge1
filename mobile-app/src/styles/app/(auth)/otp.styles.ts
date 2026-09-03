@@ -10,7 +10,7 @@ import {
   BorderRadius,
   Spacing,
   Typography,
-} from "../../shared/theme";
+} from "../../../shared/theme";
 
 export const styles = StyleSheet.create({
   container: {

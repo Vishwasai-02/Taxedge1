@@ -10,7 +10,7 @@ import {
   BorderRadius,
   Spacing,
   Typography,
-} from "../../shared/theme";
+} from "../../../shared/theme";
 
 const { width } = Dimensions.get("window");
 const H_PADDING = Spacing.base;

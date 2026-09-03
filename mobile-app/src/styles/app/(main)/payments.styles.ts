@@ -11,7 +11,7 @@ import {
   BorderWidth,
   Spacing,
   Typography,
-} from "../../shared/theme";
+} from "../../../shared/theme";
 
 export const styles = StyleSheet.create({
   root: {

@@ -22,7 +22,7 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme } from "../../hooks/use-theme";
 import { BrandColors, Colors, BorderWidth, Spacing } from "../../shared/theme";
 import { useAuthStore } from "../../store/authStore";
-import { styles } from "./create-profile.styles";
+import { styles } from "../../styles/app/(auth)/create-profile.styles";
 import type { IconName, ProfileFormValues } from "../../types/domain";
 
 const SCROLL_INSET_OFFSET = Spacing.xxl + Spacing.xl + Spacing.xs; // 60

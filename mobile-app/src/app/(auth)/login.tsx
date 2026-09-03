@@ -8,7 +8,7 @@ import { BrandColors, Spacing } from "../../shared/theme";
 import { useAuthStore } from "../../store/authStore";
 import { devAuthService } from "../../features/developmentAuth";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { styles } from "./login.styles";
+import { styles } from "../../styles/app/(auth)/login.styles";
 
 const HEADER_OFFSET = Spacing.md;
 const FOOTER_OFFSET = Spacing.base;

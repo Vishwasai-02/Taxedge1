@@ -19,7 +19,7 @@ import { useTheme } from "../../hooks/use-theme";
 import { BrandColors } from "../../shared/theme";
 import { useAuthStore } from "../../store/authStore";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { styles } from "./register.styles";
+import { styles } from "../../styles/app/(auth)/register.styles";
 import type {
   IconName,
   ProfileFormErrors,
