@@ -1,7 +1,6 @@
 import React from "react";
-import { Pressable, StyleSheet, View, Text } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -16,23 +15,24 @@ import type {
 
 import type { IconName } from "../types/domain";
 
-export const FLOATING_TAB_HEIGHT = 68;
+export const FLOATING_TAB_HEIGHT = 60;
 export const FLOATING_TAB_GAP = 12;
 
-const ACTIVE_BG = "#FFF1E6";
-const ACTIVE_FG = "#EA580C";
-const INACTIVE_FG = "rgba(255,255,255,0.75)";
+const BAR_BG = "#1E3A5F"; // Royal Navy Blue capsule background
+const ACTIVE_PILL_BG = "#FFFFFF"; // Clean white active pill
+const ACTIVE_ICON_COLOR = "#FF5722"; // Vibrant Orange icon when clicked/active
+const INACTIVE_ICON_COLOR = "#FFFFFF"; // Crisp white icon on blue background
 
 const HIDDEN_FROM_BAR = new Set(["gst"]);
 
 export interface TabMeta {
-  label?: string;
+  label: string;
   icon: IconName;
   iconOutline: IconName;
-  lucide?: string;
 }
 
 const FALLBACK_META: TabMeta = {
+  label: "Tab",
   icon: "ellipse",
   iconOutline: "ellipse-outline",
 };
@@ -47,17 +47,15 @@ function metaFor(routeName: string): TabMeta {
 }
 
 const TAB_META: Record<string, TabMeta> = {
-  home: { label: "Home", icon: "home", iconOutline: "home-outline", lucide: "House" },
-  applications: { label: "Applications", icon: "grid", iconOutline: "grid-outline", lucide: "LayoutGrid" },
-  documents: { label: "Documents", icon: "document-text", iconOutline: "document-text-outline", lucide: "FileText" },
-  payments: { label: "Payment", icon: "card", iconOutline: "card-outline", lucide: "CreditCard" },
-  profile: { label: "Profile", icon: "person", iconOutline: "person-outline", lucide: "User" },
-  gst: { label: "GST Index", icon: "book", iconOutline: "book-outline", lucide: "BookOpen" },
+  home: { label: "Home", icon: "home", iconOutline: "home-outline" },
+  applications: { label: "Applications", icon: "grid", iconOutline: "grid-outline" },
+  documents: { label: "Documents", icon: "document-text", iconOutline: "document-text-outline" },
+  payments: { label: "Payments", icon: "card", iconOutline: "card-outline" },
+  profile: { label: "Profile", icon: "person", iconOutline: "person-outline" },
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-const SPRING = { damping: 18, stiffness: 190, mass: 0.7 };
+const SPRING = { damping: 18, stiffness: 200, mass: 0.6 };
 
 type TabRoute = BottomTabBarProps["state"]["routes"][number];
 
@@ -81,7 +79,7 @@ function TabItem({
   const pressed = useSharedValue(0);
 
   const pressStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(1 - pressed.value * 0.1, SPRING) }],
+    transform: [{ scale: withSpring(1 - pressed.value * 0.08, SPRING) }],
   }));
 
   return (
@@ -98,26 +96,25 @@ function TabItem({
       onPressOut={() => {
         pressed.value = 0;
       }}
-      layout={LinearTransition.springify().damping(20).stiffness(180)}
-      style={[isFocused ? styles.tabActive : styles.tabInactive, pressStyle]}
+      style={[styles.tabItem, pressStyle]}
     >
-      <Ionicons
-        name={isFocused ? meta.icon : meta.iconOutline}
-        size={19}
-        color={isFocused ? ACTIVE_FG : INACTIVE_FG}
-      />
-      <Text
-        numberOfLines={1}
-        style={[
-          styles.tabLabel,
-          {
-            color: isFocused ? ACTIVE_FG : INACTIVE_FG,
-            fontWeight: isFocused ? "700" : "500",
-          },
-        ]}
-      >
-        {label}
-      </Text>
+      {isFocused ? (
+        <View style={styles.activePill}>
+          <Ionicons
+            name={meta.icon}
+            size={23}
+            color={ACTIVE_ICON_COLOR}
+          />
+        </View>
+      ) : (
+        <View style={styles.inactivePill}>
+          <Ionicons
+            name={meta.iconOutline}
+            size={23}
+            color={INACTIVE_ICON_COLOR}
+          />
+        </View>
+      )}
     </AnimatedPressable>
   );
 }
@@ -131,15 +128,19 @@ export function FloatingTabBar({
 
   return (
     <View
+      style={[
+        styles.floatingWrapper,
+        {
+          bottom: Math.max(insets.bottom, 10),
+        },
+      ]}
       pointerEvents="box-none"
-      style={[styles.wrap, { bottom: Math.max(insets.bottom, 10) + FLOATING_TAB_GAP }]}
     >
-      <View style={styles.bar}>
-        <View style={styles.sheen} pointerEvents="none" />
-
+      <View style={styles.capsuleContainer}>
         {state.routes.map((route, index) => {
           const options = descriptors[route.key].options as
             BottomTabNavigationOptions & { href?: Href | null };
+
           if (options.href === null) return null;
           if (HIDDEN_FROM_BAR.has(route.name.split("/")[0])) return null;
 
@@ -181,66 +182,54 @@ export function FloatingTabBar({
 }
 
 const styles = StyleSheet.create({
-  wrap: {
+  floatingWrapper: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    paddingHorizontal: 12,
+    left: 12,
+    right: 12,
     zIndex: 100,
-    elevation: 100,
+    elevation: 20,
+    alignItems: "center",
   },
-  bar: {
+  capsuleContainer: {
+    width: "100%",
+    height: FLOATING_TAB_HEIGHT,
+    backgroundColor: BAR_BG,
+    borderRadius: 30,
     flexDirection: "row",
     alignItems: "center",
-    height: FLOATING_TAB_HEIGHT,
-    paddingHorizontal: 6,
-    borderRadius: FLOATING_TAB_HEIGHT / 2,
-    overflow: "hidden",
-
-    // Glass: translucent navy + hairline highlight.
-    backgroundColor: "rgba(9,38,72,0.85)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.24)",
-
-    shadowColor: "#04203F",
-    shadowOffset: { width: 0, height: 10 },
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    shadowColor: "#0A192F",
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
-    shadowRadius: 20,
+    shadowRadius: 10,
     elevation: 14,
   },
-  sheen: {
-    position: "absolute",
-    top: 0,
-    left: 24,
-    right: 24,
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.22)",
-  },
-
-  tabInactive: {
+  tabItem: {
     flex: 1,
-    minWidth: 0,
-    height: 52,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 2,
   },
-
-  tabActive: {
-    flex: 1,
-    minWidth: 0,
-    height: 52,
+  activePill: {
+    backgroundColor: ACTIVE_PILL_BG,
+    width: "92%",
+    maxWidth: 62,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 2,
-    borderRadius: 20,
-    backgroundColor: ACTIVE_BG,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
   },
-
-  tabLabel: {
-    fontSize: 9.5,
-    marginTop: 2,
-    textAlign: "center",
-    letterSpacing: -0.2,
+  inactivePill: {
+    width: "100%",
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
